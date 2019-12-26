@@ -13,6 +13,7 @@
 - redis缓存服务
 - 消息队列（kafka）
 - web服务器 (nginx)
+- 服务进程监控服务（supervisor）
 
 ### 后台
 - 设备接入网关

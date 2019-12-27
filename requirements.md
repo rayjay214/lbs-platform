@@ -10,6 +10,7 @@
 ## 功能点分解
 ### 基础组件搭建
 - mysql数据库
+- cassandra大数据存储
 - redis缓存服务
 - 消息队列（kafka）
 - web服务器 (nginx)

@@ -1,0 +1,13 @@
+syntax = 'proto3';
+
+package customer_tree;
+
+message CustomerInfo {
+    int32 eid = 1;
+    int32 pid = 2;
+    string login_name = 3;
+}
+
+service CTree {
+    rpc getCustomInfoByID(CustomerInfo) returns (CustomerInfo);
+}

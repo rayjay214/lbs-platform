@@ -1,0 +1,22 @@
+syntax = 'proto3';
+
+package customer_tree;
+
+message CustomerInfo {
+    int32 eid = 1;
+    int32 pid = 2;
+    string login_name = 3;
+    string phone = 4;
+    string addr = 5;
+    string email = 6;
+    int32 own_dev_num = 7;
+    int32 total_dev_num = 8;
+    bool is_leaf = 9;
+    repeated int32 dev_ids = 10;
+}
+
+service CTree {
+    rpc getCustomInfo(CustomerInfo) returns (CustomerInfo) {}; 
+    rpc getChildrenInfo(CustomerInfo) returns (stream CustomerInfo){};
+    
+}

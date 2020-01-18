@@ -7,6 +7,7 @@ class ErrCode(IntEnum):
     ErrPwdNotMatch = 3
     ErrTokenTimeout = 4
     ErrTokenInvalid = 5
+    ErrMysqlError = 6
 
 
 ErrMsg = {
@@ -15,5 +16,6 @@ ErrMsg = {
     2 : 'lack parameter',
     3 : 'pwd not match',
     4 : 'token timeout',
-    5 : 'token invalid'
+    5 : 'token invalid',
+    6 : 'mysql error'
 }

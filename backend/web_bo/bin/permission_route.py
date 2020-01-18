@@ -130,7 +130,7 @@ def enterprise_login():
     login_by_ent = '00'
     check = hashlib.md5((str(eid)+time+g_cfg['master']['salt']).encode('utf-8')).hexdigest()
     access_token = version+login_by_ent+get_v_length(str(eid))+str(eid)+get_v_length(time)+time+get_v_length(check)+check
-    response.set_cookie('access_token', access_token, httponly='on', path='/', expires=arrow.now().timestamp + 86400, max_age=86400)
+    response.set_cookie('access_token', access_token, path='/', expires=arrow.now().timestamp + 86400, max_age=86400)
     #response.status = 302
 
     if eid == 8888:

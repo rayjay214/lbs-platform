@@ -7,6 +7,7 @@ from bottle import app, error, response, install, request
 from globals import g_cfg, g_logger
 import constants
 import permission_route
+import enterprise_route
 
 def enable_cors():
     response.headers['Access-Control-Allow-Credentials'] = 'true'

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='customer_tree',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x13\x63ustomer_tree.proto\x12\rcustomer_tree\"<\n\x0c\x43ustomerInfo\x12\x0b\n\x03\x65id\x18\x01 \x01(\x05\x12\x0b\n\x03pid\x18\x02 \x01(\x05\x12\x12\n\nlogin_name\x18\x03 \x01(\t2V\n\x05\x43Tree\x12M\n\x11getCustomInfoByID\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfob\x06proto3')
+  serialized_pb=_b('\n\x13\x63ustomer_tree.proto\x12\rcustomer_tree\"\xa5\x01\n\x0c\x43ustomerInfo\x12\x0b\n\x03\x65id\x18\x01 \x01(\x05\x12\x0b\n\x03pid\x18\x02 \x01(\x05\x12\x12\n\nlogin_name\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\x12\x0c\n\x04\x61\x64\x64r\x18\x05 \x01(\t\x12\r\n\x05\x65mail\x18\x06 \x01(\t\x12\x13\n\x0bown_dev_num\x18\x07 \x01(\x05\x12\x15\n\rtotal_dev_num\x18\x08 \x01(\x05\x12\x0f\n\x07is_leaf\x18\t \x01(\x08\x32\xa5\x01\n\x05\x43Tree\x12K\n\rgetCustomInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x12O\n\x0fgetChildrenInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x30\x01\x62\x06proto3')
 )
 
 
@@ -54,6 +54,48 @@ _CUSTOMERINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='phone', full_name='customer_tree.CustomerInfo.phone', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='addr', full_name='customer_tree.CustomerInfo.addr', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='email', full_name='customer_tree.CustomerInfo.email', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='own_dev_num', full_name='customer_tree.CustomerInfo.own_dev_num', index=6,
+      number=7, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='total_dev_num', full_name='customer_tree.CustomerInfo.total_dev_num', index=7,
+      number=8, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='is_leaf', full_name='customer_tree.CustomerInfo.is_leaf', index=8,
+      number=9, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -66,8 +108,8 @@ _CUSTOMERINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=38,
-  serialized_end=98,
+  serialized_start=39,
+  serialized_end=204,
 )
 
 DESCRIPTOR.message_types_by_name['CustomerInfo'] = _CUSTOMERINFO
@@ -88,13 +130,22 @@ _CTREE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=100,
-  serialized_end=186,
+  serialized_start=207,
+  serialized_end=372,
   methods=[
   _descriptor.MethodDescriptor(
-    name='getCustomInfoByID',
-    full_name='customer_tree.CTree.getCustomInfoByID',
+    name='getCustomInfo',
+    full_name='customer_tree.CTree.getCustomInfo',
     index=0,
+    containing_service=None,
+    input_type=_CUSTOMERINFO,
+    output_type=_CUSTOMERINFO,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='getChildrenInfo',
+    full_name='customer_tree.CTree.getChildrenInfo',
+    index=1,
     containing_service=None,
     input_type=_CUSTOMERINFO,
     output_type=_CUSTOMERINFO,

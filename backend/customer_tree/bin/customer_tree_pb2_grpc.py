@@ -14,8 +14,13 @@ class CTreeStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.getCustomInfoByID = channel.unary_unary(
-        '/customer_tree.CTree/getCustomInfoByID',
+    self.getCustomInfo = channel.unary_unary(
+        '/customer_tree.CTree/getCustomInfo',
+        request_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
+        response_deserializer=customer__tree__pb2.CustomerInfo.FromString,
+        )
+    self.getChildrenInfo = channel.unary_stream(
+        '/customer_tree.CTree/getChildrenInfo',
         request_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
         response_deserializer=customer__tree__pb2.CustomerInfo.FromString,
         )
@@ -25,7 +30,14 @@ class CTreeServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def getCustomInfoByID(self, request, context):
+  def getCustomInfo(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def getChildrenInfo(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -35,8 +47,13 @@ class CTreeServicer(object):
 
 def add_CTreeServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'getCustomInfoByID': grpc.unary_unary_rpc_method_handler(
-          servicer.getCustomInfoByID,
+      'getCustomInfo': grpc.unary_unary_rpc_method_handler(
+          servicer.getCustomInfo,
+          request_deserializer=customer__tree__pb2.CustomerInfo.FromString,
+          response_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
+      ),
+      'getChildrenInfo': grpc.unary_stream_rpc_method_handler(
+          servicer.getChildrenInfo,
           request_deserializer=customer__tree__pb2.CustomerInfo.FromString,
           response_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
       ),

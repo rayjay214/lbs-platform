@@ -5,5 +5,13 @@ import customer_tree_pb2_grpc
 with grpc.insecure_channel('localhost:50051') as channel:
     stub = customer_tree_pb2_grpc.CTreeStub(channel)
     customer_info = customer_tree_pb2.CustomerInfo(eid=10000)
-    cust = stub.getCustomInfoByID(customer_info)
+    cust = stub.getCustomInfo(customer_info)
     print(cust)
+
+with grpc.insecure_channel('localhost:50051') as channel:
+    stub = customer_tree_pb2_grpc.CTreeStub(channel)
+    customer_info = customer_tree_pb2.CustomerInfo(eid=10000)
+    cust = stub.getChildrenInfo(customer_info)
+    for c in cust:
+        print(c)
+

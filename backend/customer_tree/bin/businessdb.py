@@ -8,21 +8,28 @@ class BusinessDb(BaseDb):
 
     def load_all_ent(self):
         self.check()
-        sql = '''select eid, pid, login_name from t_enterprise order by eid'''
+        sql = '''select eid,pid,login_name,phone,addr,email from t_enterprise order by eid'''
         with self.conn.cursor() as cursor:
             cursor.execute(sql)
             g_logger.info(cursor._executed)
-            ents = []
-            rows = cursor.fetchall()
-            for row in rows:
-                ent = {
-                    'eid' : row[0],
-                    'pid' : row[1],
-                    'login_name' : row[2]
-                }
-                ents.append(ent)
+            max_fetch = 100
+            while True:
+                rows = cursor.fetchmany(size=max_fetch)
+                if rows is None:
+                    break
+                for row in rows:
+                    ent = {
+                        'eid' : row[0],
+                        'pid' : row[1],
+                        'login_name' : row[2],
+                        'phone' : row[3],
+                        'addr' : row[4],
+                        'email' : row[5]
+                    }
+                    yield ent
+                if len(rows) < max_fetch:
+                    break
 
-        return ents
 
     def load_all_device(self):
         self.check()
@@ -30,15 +37,19 @@ class BusinessDb(BaseDb):
         with self.conn.cursor() as cursor:
             cursor.execute(sql)
             g_logger.info(cursor._executed)
-            devices = []
-            rows = cursor.fetchall()
-            for row in rows:
-                device = {
-                    'dev_id' : row[0],
-                    'eid' : row[1],
-                }
-                devices.append(device)
+            max_fetch = 100
+            while True:
+                rows = cursor.fetchmany(size=max_fetch)
+                if rows is None:
+                    break
+                for row in rows:
+                    device = {
+                        'dev_id' : row[0],
+                        'eid' : row[1],
+                    }
+                    yield device
+                if len(rows) < max_fetch:
+                    break
 
-        return devices
 
 

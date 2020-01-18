@@ -21,6 +21,10 @@ class KafkaConsumer(threading.Thread):
             'update' : {
                 't_device' : self.ctree.update_device,
                 't_enterprise' : self.ctree.update_ent
+            },
+            'delete' : {
+                't_device' : self.ctree.delete_device,
+                't_enterprise' : self.ctree.delete_ent
             }
         }.get(action, {}).get(table)
 
@@ -30,7 +34,7 @@ class KafkaConsumer(threading.Thread):
         if handle is None:
             g_logger.error('invalid msg {}'.format(msg))
             return
-        handle(msg)
+        handle(event)
 
     def run(self):
         self.consumer.subscribe(g_cfg['KAFKA']['topic'].split(','))

@@ -16,7 +16,7 @@ class BusinessDb(BaseDb):
             row = cursor.fetchone()
             return row[0], row[1]
 
-    def get_ent_by_eid(self, eid) -> int,dict:
+    def get_ent_by_eid(self, eid) -> tuple:
         self.check()
         sql = '''select * from t_enterprise where eid={}'''.format(eid)
         try:
@@ -68,12 +68,12 @@ class BusinessDb(BaseDb):
 
     def update_ent(self, ent: dict):
         self.check()
-        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}'
-        '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'])
+        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}' where eid={};
+            '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'], ent['eid'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
-                g_logger.debug(cursor._executed)
+                g_logger.info(cursor._executed)
                 self.conn.commit()
                 return ErrCode.ErrOK
         except Exception as e:

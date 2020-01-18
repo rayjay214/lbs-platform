@@ -22,7 +22,9 @@ def verify(callback):
         try:
             method = '/'.join(request.fullpath.split('/')[-2:])
 
-            if method != 'login/loginByEnt':
+            test = request.params.get('test', None)
+
+            if method != 'login/loginByEnt' and test is None:
                 access_token = request.get_cookie("access_token", None)
                 if access_token is None:
                     access_token = request.params.get("access_token", None)

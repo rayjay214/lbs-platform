@@ -95,13 +95,15 @@ def deleteEnt():
 
 @route('/ent/updateEnt')
 def updateEnt():
+    g_logger.info('enter')
     errcode, data = ErrCode.ErrOK, {}
     eid = request.params.get('eid', None)
     pid = request.params.get('pid', None)
     phone = request.params.get('phone', None)
     addr = request.params.get('addr', None)
     email  = request.params.get('email', None)
-    if ent['eid'] is None:
+    if eid is None:
+        g_logger.warn('eid is none')
         errcode = ErrCode.ErrLackParam
         return errcode, data
     db_r = BusinessDb(g_cfg['db_business_r'])

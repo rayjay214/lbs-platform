@@ -10,7 +10,9 @@ from globals import g_logger
 from businessdb import BusinessDb
 import traceback
 from ctree_op import CtreeOp
+from redis_op import RedisOp
 from customer_tree_pb2 import CustomerInfo
+import redis
 
 @route('/ent/getEntInfoByEid')
 def getEntInfoByEid():
@@ -95,7 +97,6 @@ def deleteEnt():
 
 @route('/ent/updateEnt')
 def updateEnt():
-    g_logger.info('enter')
     errcode, data = ErrCode.ErrOK, {}
     eid = request.params.get('eid', None)
     pid = request.params.get('pid', None)
@@ -119,6 +120,18 @@ def updateEnt():
     errcode = db_w.update_ent(ent)
     return errcode, data
 
-
+@route('ent/getSubDeviceInfo')
+def getSubDeviceInfo():
+    errcode, data = ErrCode.ErrOK, {}
+    eid = request.params.get('eid', None)
+    if eid is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    tree_op = CtreeOp(g_cfg['ctree'])
+    customer = tree_op.getCustomInfoByEid(int(eid))
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_infos = redis_op.getDeviceInfos(customer.dev_ids)
+    data['records'] = dev_infos
+    return errcode, data
 
 

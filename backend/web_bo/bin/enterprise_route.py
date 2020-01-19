@@ -121,7 +121,7 @@ def getSubDeviceInfo():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     customer = g_ctree_op.getCustomInfoByEid(int(eid))
-    dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids, pageno, pagesize)
+    dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids, int(pageno), int(pagesize))
     data['total_cnt'] = len(customer.dev_ids)
     data['records'] = dev_infos
     return errcode, data

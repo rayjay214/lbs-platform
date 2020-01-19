@@ -12,7 +12,7 @@ class ErrCode(IntEnum):
 
 ErrMsg = {
     0 : 'OK',
-    1 : 'Data not found',
+    1 : 'data not found',
     2 : 'lack parameter',
     3 : 'pwd not match',
     4 : 'token timeout',

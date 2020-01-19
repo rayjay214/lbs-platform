@@ -44,7 +44,7 @@ def getEntChildrenByEid():
     data['addr'] = customer.addr
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
-    children, channel = tree_op.getChildrenInfoByEid(int(eid)) #caller have to close channel manually
+    children, channel = g_ctree_op.getChildrenInfoByEid(int(eid))  #caller have to close channel manually
     for child in children:
         info = {}
         info['eid'] = child.eid

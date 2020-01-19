@@ -14,9 +14,13 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
     def getCustomInfo(self, request, context):
         with self.tree_lock.gen_rlock():
             node = search.find_by_attr(self.tree.root, name='id', value=request.eid)
-            return CustomerInfo(eid=node.id, login_name=node.login_name,
-                    phone=node.phone, addr=node.addr, email=node.email, is_leaf=node.is_leaf,
-                    own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num)
+            dev_ids = node.dev_ids
+            info = CustomerInfo(eid=node.id, login_name=node.login_name,
+                phone=node.phone, addr=node.addr, email=node.email, is_leaf=node.is_leaf,
+                own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num)
+            for dev_id in dev_ids:
+                info.dev_ids.append(dev_id)
+            return info
 
     def getChildrenInfo(self, request, context):
         with self.tree_lock.gen_rlock():

@@ -4,7 +4,7 @@ class RedisOp():
     def __init__(self, cfg):
         self.host = cfg['host']
         self.port = cfg['port']
-        self.redis = redis.Redis(host=self.host, port=self.port)
+        self.redis = redis.StrictRedis(host=self.host, port=self.port, charset='utf-8', decode_responses=True)
         self.pipe = self.redis.pipeline()
 
     def getDeviceInfos(self, dev_ids):

@@ -2,6 +2,7 @@ from anytree import Node, RenderTree
 from anytree import AnyNode
 from anytree import search
 from globals import g_logger, g_cfg
+from sortedcontainers import sortedset
 
 class CustomerTree():
     def __init__(self, db, rwlock):
@@ -18,12 +19,13 @@ class CustomerTree():
         ent_gen = self.data_source.load_all_ent()
         for ent in ent_gen:
             if ent['pid'] == 0:
+                # some interface about dev_ids need to be paged, so it has to be ordered
                 self.root = AnyNode(login_name=ent['login_name'], id=ent['eid'],phone=ent['phone'],
-                                    addr=ent['addr'], email=ent['email'], dev_ids=set(), total_dev_num=0, parent=None)
+                                    addr=ent['addr'], email=ent['email'], dev_ids=sortedset(), total_dev_num=0, parent=None)
                 continue
             myparent = search.find_by_attr(self.root, name='id', value=ent['pid'])
             node = AnyNode(login_name=ent['login_name'], id=ent['eid'],phone=ent['phone'],
-                           addr=ent['addr'], email=ent['email'], dev_ids=set(), total_dev_num=0, parent=myparent)
+                           addr=ent['addr'], email=ent['email'], dev_ids=sortedset(), total_dev_num=0, parent=myparent)
         device_gen = self.data_source.load_all_device()
         cache_node = {}
         for device in device_gen:

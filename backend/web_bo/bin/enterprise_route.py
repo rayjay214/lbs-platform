@@ -10,7 +10,6 @@ from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w
 from businessdb import BusinessDb
 import traceback
 from customer_tree_pb2 import CustomerInfo
-import redis
 
 @route('/ent/getEntInfoByEid')
 def getEntInfoByEid():
@@ -116,12 +115,13 @@ def updateEnt():
 def getSubDeviceInfo():
     errcode, data = ErrCode.ErrOK, {}
     eid = request.params.get('eid', None)
+    pageno = request.params.get('pageno', 0)
+    pagesize = request.params.get('pagesize', 20)
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
     customer = g_ctree_op.getCustomInfoByEid(int(eid))
-    dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids)
+    dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids, pageno, pagesize)
+    data['total_cnt'] = len(customer.dev_ids)
     data['records'] = dev_infos
     return errcode, data
-
-

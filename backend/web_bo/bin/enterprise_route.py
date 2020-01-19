@@ -19,6 +19,9 @@ def getEntInfoByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     customer = g_ctree_op.getCustomInfoByEid(int(eid))
+    if customer.eid is None:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
     data['eid'] = customer.eid
     data['pid'] = customer.pid
     data['login_name'] = customer.login_name
@@ -46,13 +49,9 @@ def getEntChildrenByEid():
     data['leaf'] = customer.is_leaf
     children, channel = g_ctree_op.getChildrenInfoByEid(int(eid))  #caller have to close channel manually
     for child in children:
-        info = {}
-        info['eid'] = child.eid
-        info['text'] = '''{}({}/{})'''.format(child.login_name, child.own_dev_num, child.total_dev_num)
-        info['addr'] = child.addr
-        info['phone'] = child.phone
-        info['email'] = child.email
-        info['leaf'] = child.is_leaf
+        info = {'eid': child.eid,
+                'text': '''{}({}/{})'''.format(child.login_name, child.own_dev_num, child.total_dev_num),
+                'addr': child.addr, 'phone': child.phone, 'email': child.email, 'leaf': child.is_leaf}
         records.append(info)
 
     channel.close()
@@ -125,3 +124,17 @@ def getSubDeviceInfo():
     data['total_cnt'] = len(customer.dev_ids)
     data['records'] = dev_infos
     return errcode, data
+
+@route('/ent/searchEntByLName')
+def searchEntByLName(): #todo, support vague query
+    errcode, data = ErrCode.ErrOK, {}
+    login_name = request.params.get('login_name', None)
+    if login_name is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    customer = g_ctree_op.getCustomInfoByLName(login_name)
+    if customer.eid is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    #check permission
+    login_id = request.params.get('LOGIN_ID')

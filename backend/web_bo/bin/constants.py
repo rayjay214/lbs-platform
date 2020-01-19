@@ -18,4 +18,5 @@ ErrMsg = {
     4 : 'token timeout',
     5 : 'token invalid',
     6 : 'mysql error'
+
 }

@@ -5,12 +5,10 @@ import json
 import arrow
 from bottle import install, request, route, response
 from constants import ErrMsg, ErrCode
-from globals import g_cfg
-from globals import g_logger
+from globals import g_cfg, g_logger
+from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w
 from businessdb import BusinessDb
 import traceback
-from ctree_op import CtreeOp
-from redis_op import RedisOp
 from customer_tree_pb2 import CustomerInfo
 import redis
 
@@ -21,13 +19,11 @@ def getEntInfoByEid():
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    tree_op = CtreeOp(g_cfg['ctree'])
-    customer = tree_op.getCustomInfoByEid(int(eid))
+    customer = g_ctree_op.getCustomInfoByEid(int(eid))
     data['eid'] = customer.eid
     data['pid'] = customer.pid
     data['login_name'] = customer.login_name
     data['phone'] = customer.phone
-    g_logger.info(type(customer.addr))
     data['addr'] = customer.addr
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
@@ -41,8 +37,7 @@ def getEntChildrenByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     records = []
-    tree_op = CtreeOp(g_cfg['ctree'])
-    customer = tree_op.getCustomInfoByEid(int(eid))
+    customer = g_ctree_op.getCustomInfoByEid(int(eid))
     data['eid'] = customer.eid
     data['pid'] = customer.pid
     data['text'] = '''{}({}/{})'''.format(customer.login_name, customer.own_dev_num, customer.total_dev_num)
@@ -78,8 +73,7 @@ def addEnt():
     if None in (ent['pid'], ent['login_name'], ent['pwd']):
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    db = BusinessDb(g_cfg['db_business_w'])
-    errcode = db.add_ent(ent)
+    errcode = g_db_w.add_ent(ent)
     data['msg'] = ErrMsg[errcode]
     return errcode, data
 
@@ -91,8 +85,7 @@ def deleteEnt():
     if ent['eid'] is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    db = BusinessDb(g_cfg['db_business_w'])
-    errcode = db.delete_ent(ent)
+    errcode = g_db_w.delete_ent(ent)
     return errcode, data
 
 @route('/ent/updateEnt')
@@ -107,8 +100,7 @@ def updateEnt():
         g_logger.warn('eid is none')
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    db_r = BusinessDb(g_cfg['db_business_r'])
-    errcode, ent = db_r.get_ent_by_eid(eid)
+    errcode, ent = g_db_r.get_ent_by_eid(eid)
     if errcode != ErrCode.ErrOK:
         data['msg'] = ErrMsg[errcode]
         return errcode, data
@@ -116,21 +108,19 @@ def updateEnt():
     ent['phone'] = phone if phone is not None else ent['phone']
     ent['addr'] = addr if addr is not None else ent['addr']
     ent['email'] = email if email is not None else ent['email']
-    db_w = BusinessDb(g_cfg['db_business_w'])
-    errcode = db_w.update_ent(ent)
+    errcode = g_db_w.update_ent(ent)
     return errcode, data
 
-@route('ent/getSubDeviceInfo')
+
+@route('/ent/getSubDeviceInfo')
 def getSubDeviceInfo():
     errcode, data = ErrCode.ErrOK, {}
     eid = request.params.get('eid', None)
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    tree_op = CtreeOp(g_cfg['ctree'])
-    customer = tree_op.getCustomInfoByEid(int(eid))
-    redis_op = RedisOp(g_cfg['redis'])
-    dev_infos = redis_op.getDeviceInfos(customer.dev_ids)
+    customer = g_ctree_op.getCustomInfoByEid(int(eid))
+    dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids)
     data['records'] = dev_infos
     return errcode, data
 

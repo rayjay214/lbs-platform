@@ -93,7 +93,7 @@ def deleteEnt():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), ent['eid'])
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(ent['eid']))
     if not is_ancestor:
         errcode = ErrCode.ErrNoPermission
         return errcode, data

@@ -20,3 +20,9 @@ ErrMsg = {
     6 : 'mysql error',
     7 : 'no permission'
 }
+
+RedisKeyPrefix = {
+    'DeviceInfo' : 'device',
+    'Imei' : 'imei',
+    'DeviceRunInfo' : 'devruninfo'
+}

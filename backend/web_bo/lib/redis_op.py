@@ -12,3 +12,11 @@ class RedisOp():
             self.pipe.hgetall('device:{}'.format(dev_id))
         dev_infos = self.pipe.execute()
         return dev_infos
+
+    def getDeviceInfoById(self, dev_id):
+        dev_info = self.redis.hgetall('device:{}'.format(dev_id))
+        return dev_info
+
+    def getDeviceInfoByImei(self, imei):
+        dev_id = self.redis.get('imei:{}'.format(imei))
+        return self.getDeviceInfoById(dev_id)

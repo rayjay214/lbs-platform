@@ -100,7 +100,7 @@ def get_v_length(value):
 
 
 # login by enterprise
-@route('/login/loginByEnt')
+@route('/login/loginByEnt', method=['GET', 'POST'])
 def enterprise_login():
     errcode, data = ErrCode.ErrOK, {}
     login_name = request.params.get('login_name', None)

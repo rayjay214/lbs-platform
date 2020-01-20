@@ -1,6 +1,7 @@
 import grpc
 import customer_tree_pb2
 import customer_tree_pb2_grpc
+from globals import g_logger, g_cfg
 
 class CtreeOp():
     def __init__(self, cfg):
@@ -14,6 +15,13 @@ class CtreeOp():
             cust = stub.getCustomerInfo(customer_info)
             return cust
 
+    def getCustomInfoByLName(self, login_name):
+        with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
+            stub = customer_tree_pb2_grpc.CTreeStub(channel)
+            customer_info = customer_tree_pb2.CustomerInfo(login_name=login_name)
+            cust = stub.getCustomerInfo(customer_info)
+            return cust
+
     def getChildrenInfoByEid(self, eid):
         channel = grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port))
         stub = customer_tree_pb2_grpc.CTreeStub(channel)
@@ -22,10 +30,12 @@ class CtreeOp():
         return children, channel
 
     def isAncestor(self, ancestor, descendant):
-        grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
+        if ancestor == descendant:
+            return True
+        with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
             stub = customer_tree_pb2_grpc.CTreeStub(channel)
             customer_info = customer_tree_pb2.CustomerInfo(eid=descendant)
-            ancestors = stub.getAncestorsInfo()
+            ancestors = stub.getAncestorsInfo(customer_info)
             for cust in ancestors:
                 if cust.eid == ancestor:
                     return True

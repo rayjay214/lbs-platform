@@ -19,7 +19,7 @@ def getEntInfoByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     customer = g_ctree_op.getCustomInfoByEid(int(eid))
-    if customer.eid is None:
+    if customer.eid == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     data['eid'] = customer.eid
@@ -133,14 +133,14 @@ def searchEntByLName(): #todo, support vague query
         errcode = ErrCode.ErrLackParam
         return errcode, data
     customer = g_ctree_op.getCustomInfoByLName(login_name)
-    if customer.eid is None:
-        errcode = ErrCode.ErrLackParam
+    if customer.eid == 0:
+        errcode = ErrCode.ErrDataNotFound
         return errcode, data
     #check permission
     login_id = request.params.get('LOGIN_ID')
     is_ancestor = g_ctree_op.isAncestor(int(login_id), customer.eid)
     if not is_ancestor:
-        errcode.ErrCode.ErrNoPermission
+        errcode = ErrCode.ErrNoPermission
         return errcode, data
     data['eid'] = customer.eid
     data['pid'] = customer.pid

@@ -13,7 +13,10 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
 
     def getCustomerInfo(self, request, context):
         with self.tree_lock.gen_rlock():
-            node = search.find_by_attr(self.tree.root, name='id', value=request.eid)
+            if request.eid is not None:
+                node = search.find_by_attr(self.tree.root, name='id', value=request.eid)
+            else:
+                node = search.find_by_attr(self.tree.root, name='login_name', value=request.login_name)
             if node is None:
                 return CustomerInfo()
             dev_ids = node.dev_ids

@@ -23,4 +23,13 @@ def searchDeviceByImei():
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     dev_info = g_redis_op.getDeviceInfoByImei(imei)
+    if dev_info is None or len(dev_info) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    if not is_ancestor:
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
     data = dev_info
+    return errcode, data

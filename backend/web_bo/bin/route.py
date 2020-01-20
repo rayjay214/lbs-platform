@@ -8,6 +8,7 @@ from globals import g_cfg, g_logger
 import constants
 import permission_route
 import enterprise_route
+import device_route
 
 def enable_cors():
     response.headers['Access-Control-Allow-Credentials'] = 'true'

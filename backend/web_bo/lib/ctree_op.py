@@ -27,3 +27,13 @@ class CtreeOp():
         customer_info = customer_tree_pb2.CustomerInfo(eid=eid)
         children = stub.getChildrenInfo(customer_info)
         return children, channel
+
+    def isAncestor(self, ancestor, descendant):
+        grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
+            stub = customer_tree_pb2_grpc.CTreeStub(channel)
+            customer_info = customer_tree_pb2.CustomerInfo(eid=descendant)
+            ancestors = stub.getAncestorsInfo()
+            for cust in ancestors:
+                if cust.eid == ancestor:
+                    return True
+            return False

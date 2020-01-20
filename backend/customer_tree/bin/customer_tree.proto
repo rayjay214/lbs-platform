@@ -6,8 +6,18 @@ message CustomerInfo {
     int32 eid = 1;
     int32 pid = 2;
     string login_name = 3;
+    string phone = 4;
+    string addr = 5;
+    string email = 6;
+    int32 own_dev_num = 7;
+    int32 total_dev_num = 8;
+    bool is_leaf = 9;
+    repeated int32 dev_ids = 10;
 }
 
 service CTree {
-    rpc getCustomInfoByID(CustomerInfo) returns (CustomerInfo);
+    rpc getCustomerInfo(CustomerInfo) returns (CustomerInfo) {};
+    rpc getCustomerInfos(stream CustomerInfo) returns (stream CustomerInfo) {}; 
+    rpc getChildrenInfo(CustomerInfo) returns (stream CustomerInfo){};
+    rpc getAncestorsInfo(CustomerInfo) returns (stream CustomerInfo){};
 }

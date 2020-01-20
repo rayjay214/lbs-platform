@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='customer_tree',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x13\x63ustomer_tree.proto\x12\rcustomer_tree\"\xb6\x01\n\x0c\x43ustomerInfo\x12\x0b\n\x03\x65id\x18\x01 \x01(\x05\x12\x0b\n\x03pid\x18\x02 \x01(\x05\x12\x12\n\nlogin_name\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\x12\x0c\n\x04\x61\x64\x64r\x18\x05 \x01(\t\x12\r\n\x05\x65mail\x18\x06 \x01(\t\x12\x13\n\x0bown_dev_num\x18\x07 \x01(\x05\x12\x15\n\rtotal_dev_num\x18\x08 \x01(\x05\x12\x0f\n\x07is_leaf\x18\t \x01(\x08\x12\x0f\n\x07\x64\x65v_ids\x18\n \x03(\x05\x32\xa5\x01\n\x05\x43Tree\x12K\n\rgetCustomInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x12O\n\x0fgetChildrenInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x30\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x13\x63ustomer_tree.proto\x12\rcustomer_tree\"\xb6\x01\n\x0c\x43ustomerInfo\x12\x0b\n\x03\x65id\x18\x01 \x01(\x05\x12\x0b\n\x03pid\x18\x02 \x01(\x05\x12\x12\n\nlogin_name\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\x12\x0c\n\x04\x61\x64\x64r\x18\x05 \x01(\t\x12\r\n\x05\x65mail\x18\x06 \x01(\t\x12\x13\n\x0bown_dev_num\x18\x07 \x01(\x05\x12\x15\n\rtotal_dev_num\x18\x08 \x01(\x05\x12\x0f\n\x07is_leaf\x18\t \x01(\x08\x12\x0f\n\x07\x64\x65v_ids\x18\n \x03(\x05\x32\xcd\x02\n\x05\x43Tree\x12M\n\x0fgetCustomerInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x12R\n\x10getCustomerInfos\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00(\x01\x30\x01\x12O\n\x0fgetChildrenInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x30\x01\x12P\n\x10getAncestorsInfo\x12\x1b.customer_tree.CustomerInfo\x1a\x1b.customer_tree.CustomerInfo\"\x00\x30\x01\x62\x06proto3')
 )
 
 
@@ -138,12 +138,21 @@ _CTREE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   serialized_start=224,
-  serialized_end=389,
+  serialized_end=557,
   methods=[
   _descriptor.MethodDescriptor(
-    name='getCustomInfo',
-    full_name='customer_tree.CTree.getCustomInfo',
+    name='getCustomerInfo',
+    full_name='customer_tree.CTree.getCustomerInfo',
     index=0,
+    containing_service=None,
+    input_type=_CUSTOMERINFO,
+    output_type=_CUSTOMERINFO,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='getCustomerInfos',
+    full_name='customer_tree.CTree.getCustomerInfos',
+    index=1,
     containing_service=None,
     input_type=_CUSTOMERINFO,
     output_type=_CUSTOMERINFO,
@@ -152,7 +161,16 @@ _CTREE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='getChildrenInfo',
     full_name='customer_tree.CTree.getChildrenInfo',
-    index=1,
+    index=2,
+    containing_service=None,
+    input_type=_CUSTOMERINFO,
+    output_type=_CUSTOMERINFO,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='getAncestorsInfo',
+    full_name='customer_tree.CTree.getAncestorsInfo',
+    index=3,
     containing_service=None,
     input_type=_CUSTOMERINFO,
     output_type=_CUSTOMERINFO,

@@ -9,6 +9,8 @@ class ErrCode(IntEnum):
     ErrTokenInvalid = 5
     ErrMysqlError = 6
     ErrNoPermission = 7
+    ErrEntHasDevice = 8
+    ErrEntHasChildren = 9
 
 ErrMsg = {
     0 : 'OK',
@@ -18,7 +20,9 @@ ErrMsg = {
     4 : 'token timeout',
     5 : 'token invalid',
     6 : 'mysql error',
-    7 : 'no permission'
+    7 : 'no permission',
+    8 : 'account still has devices',
+    9 : 'account still has children accounts'
 }
 
 RedisKeyPrefix = {

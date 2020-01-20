@@ -11,14 +11,7 @@ class CtreeOp():
         with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
             stub = customer_tree_pb2_grpc.CTreeStub(channel)
             customer_info = customer_tree_pb2.CustomerInfo(eid=eid)
-            cust = stub.getCustomInfo(customer_info)
-            return cust
-
-    def getCustomInfoByLName(self, login_name):
-        with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
-            stub = customer_tree_pb2_grpc.CTreeStub(channel)
-            customer_info = customer_tree_pb2.CustomerInfo(login_name=login_name)
-            cust = stub.getCustomInfo(customer_info)
+            cust = stub.getCustomerInfo(customer_info)
             return cust
 
     def getChildrenInfoByEid(self, eid):

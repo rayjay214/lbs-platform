@@ -14,13 +14,23 @@ class CTreeStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.getCustomInfo = channel.unary_unary(
-        '/customer_tree.CTree/getCustomInfo',
+    self.getCustomerInfo = channel.unary_unary(
+        '/customer_tree.CTree/getCustomerInfo',
+        request_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
+        response_deserializer=customer__tree__pb2.CustomerInfo.FromString,
+        )
+    self.getCustomerInfos = channel.stream_stream(
+        '/customer_tree.CTree/getCustomerInfos',
         request_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
         response_deserializer=customer__tree__pb2.CustomerInfo.FromString,
         )
     self.getChildrenInfo = channel.unary_stream(
         '/customer_tree.CTree/getChildrenInfo',
+        request_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
+        response_deserializer=customer__tree__pb2.CustomerInfo.FromString,
+        )
+    self.getAncestorsInfo = channel.unary_stream(
+        '/customer_tree.CTree/getAncestorsInfo',
         request_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
         response_deserializer=customer__tree__pb2.CustomerInfo.FromString,
         )
@@ -30,7 +40,14 @@ class CTreeServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def getCustomInfo(self, request, context):
+  def getCustomerInfo(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def getCustomerInfos(self, request_iterator, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -44,16 +61,33 @@ class CTreeServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getAncestorsInfo(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_CTreeServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'getCustomInfo': grpc.unary_unary_rpc_method_handler(
-          servicer.getCustomInfo,
+      'getCustomerInfo': grpc.unary_unary_rpc_method_handler(
+          servicer.getCustomerInfo,
+          request_deserializer=customer__tree__pb2.CustomerInfo.FromString,
+          response_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
+      ),
+      'getCustomerInfos': grpc.stream_stream_rpc_method_handler(
+          servicer.getCustomerInfos,
           request_deserializer=customer__tree__pb2.CustomerInfo.FromString,
           response_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
       ),
       'getChildrenInfo': grpc.unary_stream_rpc_method_handler(
           servicer.getChildrenInfo,
+          request_deserializer=customer__tree__pb2.CustomerInfo.FromString,
+          response_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
+      ),
+      'getAncestorsInfo': grpc.unary_stream_rpc_method_handler(
+          servicer.getAncestorsInfo,
           request_deserializer=customer__tree__pb2.CustomerInfo.FromString,
           response_serializer=customer__tree__pb2.CustomerInfo.SerializeToString,
       ),

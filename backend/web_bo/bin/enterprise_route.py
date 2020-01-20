@@ -138,3 +138,15 @@ def searchEntByLName(): #todo, support vague query
         return errcode, data
     #check permission
     login_id = request.params.get('LOGIN_ID')
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), customer.eid)
+    if not is_ancestor:
+        errcode.ErrCode.ErrNoPermission
+        return errcode, data
+    data['eid'] = customer.eid
+    data['pid'] = customer.pid
+    data['login_name'] = customer.login_name
+    data['phone'] = customer.phone
+    data['addr'] = customer.addr
+    data['email'] = customer.email
+    data['leaf'] = customer.is_leaf
+    return errcode, data

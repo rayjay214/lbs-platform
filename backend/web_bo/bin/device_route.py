@@ -13,7 +13,23 @@ import traceback
 @route('/device/importDevices')
 def importDevices():
     errcode, data = ErrCode.ErrOK, {}
+    target_eid = request.params.get('target_eid', None)
+    product_type = request.params.get('product_type', None)
+    dev_infos = request.params.get('device_infos', None)
+    if None in (target_eid, product_type, dev_infos):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    dev_infos.replace(' ', '').replace('\r\n', ';').replace('\r', ';').replace('\n', ';')
+    filtered_dev_infos = ';'.join([v for v in dev_infos.split(';') if len(v) > 0])
+    rows = filtered_dev_infos.split(';')
+    insert_rows = []
+    for row in rows:
+        # imei, dev_name, eid, product_type
+        insert_data = (str(row), 'YJ-' + str(row)[-5:], int(target_eid), str(product_type))
+        insert_rows.append(row)
+    errcode = g_db_w.imoort_devices(insert_rows)
     return errcode, data
+
 
 @route('/device/searchByImei')
 def searchDeviceByImei():
@@ -28,7 +44,7 @@ def searchDeviceByImei():
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
     is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
-    if not is_ancestor:
+    if not is_ancestor and int(login_id) != dev_info['eid']:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     data = dev_info

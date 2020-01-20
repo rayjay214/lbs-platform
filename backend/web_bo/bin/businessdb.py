@@ -80,3 +80,15 @@ class BusinessDb(BaseDb):
             g_logger.error(e)
             return ErrCode.ErrMysqlError
 
+    def imoort_devices(self, rows: list):
+        self.check()
+        sql = 'insert into t_device (imei, dev_name, eid, product_type) values (%s, %s, %s, %s)'
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.executemany(sql, rows)
+                g_logger.info(cursor._executed)
+                self.conn.commit()
+                return ErrCode.ErrOK
+        except Exception as e:
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError

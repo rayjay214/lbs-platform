@@ -10,6 +10,7 @@ from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w
 from businessdb import BusinessDb
 import traceback
 from customer_tree_pb2 import CustomerInfo
+import itertools
 
 @route('/ent/getEntInfoByEid')
 def getEntInfoByEid():
@@ -18,7 +19,7 @@ def getEntInfoByEid():
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    customer = g_ctree_op.getCustomInfoByEid(int(eid))
+    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
     if customer.eid == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
@@ -39,7 +40,7 @@ def getEntChildrenByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     records = []
-    customer = g_ctree_op.getCustomInfoByEid(int(eid))
+    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
     data['eid'] = customer.eid
     data['pid'] = customer.pid
     data['text'] = '''{}({}/{})'''.format(customer.login_name, customer.own_dev_num, customer.total_dev_num)
@@ -75,6 +76,14 @@ def addEnt():
     data['msg'] = ErrMsg[errcode]
     return errcode, data
 
+#peek a generator, mainly used to check if it is empty
+def peek(iterable):
+    try:
+        first = next(iterable)
+    except StopIteration:
+        return None
+    return first, itertools.chain([first], iterable)
+
 @route('/ent/deleteEnt')
 def deleteEnt():
     errcode, data = ErrCode.ErrOK, {}
@@ -83,7 +92,26 @@ def deleteEnt():
     if ent['eid'] is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), ent['eid'])
+    if not is_ancestor:
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    #the ent can be deleted only if it has no sub children and no devices attached
+    customer = g_ctree_op.getCustomerInfoByEid(int(ent['eid']))
+    if customer.own_dev_num > 0:
+        errcode = ErrCode.ErrEntHasDevice
+        return errcode, data
+    children, channel = g_ctree_op.getChildrenInfoByEid(int(ent['eid']))
+    res = peek(children)
+    if res is None:
+        g_logger.info('{} has no children accounts'.format(ent['eid']))
+    else:
+        channel.close()
+        errcode = ErrCode.ErrEntHasChildren
+        return errcode, data
     errcode = g_db_w.delete_ent(ent)
+    channel.close()
     return errcode, data
 
 @route('/ent/updateEnt')
@@ -132,14 +160,14 @@ def searchEntByLName(): #todo, support vague query
     if login_name is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    customer = g_ctree_op.getCustomInfoByLName(login_name)
+    customer = g_ctree_op.getCustomerInfoByLName(login_name)
     if customer.eid == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     #check permission
     login_id = request.params.get('LOGIN_ID')
     is_ancestor = g_ctree_op.isAncestor(int(login_id), customer.eid)
-    if not is_ancestor:
+    if not is_ancestor and int(login_id) != customer.eid:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     data['eid'] = customer.eid

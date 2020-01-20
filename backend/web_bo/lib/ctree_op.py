@@ -8,14 +8,14 @@ class CtreeOp():
         self.server_ip = cfg['server_ip']
         self.server_port = cfg['server_port']
 
-    def getCustomInfoByEid(self, eid):
+    def getCustomerInfoByEid(self, eid):
         with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
             stub = customer_tree_pb2_grpc.CTreeStub(channel)
             customer_info = customer_tree_pb2.CustomerInfo(eid=eid)
             cust = stub.getCustomerInfo(customer_info)
             return cust
 
-    def getCustomInfoByLName(self, login_name):
+    def getCustomerInfoByLName(self, login_name):
         with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
             stub = customer_tree_pb2_grpc.CTreeStub(channel)
             customer_info = customer_tree_pb2.CustomerInfo(login_name=login_name)
@@ -30,8 +30,6 @@ class CtreeOp():
         return children, channel
 
     def isAncestor(self, ancestor, descendant):
-        if ancestor == descendant:
-            return True
         with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
             stub = customer_tree_pb2_grpc.CTreeStub(channel)
             customer_info = customer_tree_pb2.CustomerInfo(eid=descendant)

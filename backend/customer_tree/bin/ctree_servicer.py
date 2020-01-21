@@ -20,9 +20,10 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
             if node is None:
                 return CustomerInfo()
             dev_ids = node.dev_ids
+            pid = node.parent.id if node.parent is not None else 0
             info = CustomerInfo(eid=node.id, login_name=node.login_name,
                 phone=node.phone, addr=node.addr, email=node.email, is_leaf=node.is_leaf,
-                own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num)
+                own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num, pid=pid)
             for dev_id in dev_ids:
                 info.dev_ids.append(dev_id)
             return info

@@ -22,5 +22,11 @@ class RedisOp():
         return self.getDeviceInfoById(dev_id)
 
     def getDeviceRunInfoById(self, dev_id):
-        run_info = self.redis.get('devruninfo:{}'.format(dev_id))
+        run_info = self.redis.hgetall('devruninfo:{}'.format(dev_id))
         return run_info
+
+    def getDeviceRunInfos(self, dev_ids):
+        for dev_id in dev_ids:
+            self.pipe.hgetall('devruninfo:{}'.format(dev_id))
+        run_infos = self.pipe.execute()
+        return run_infos

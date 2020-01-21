@@ -51,14 +51,14 @@ def searchDeviceByImei():
     return errcode, data
 
 @route('/device/getRunInfoByDevid')
-def getGpsInfoByDevid():
+def getRunInfoByDevid():
     errcode, data = ErrCode.ErrOK, {}
     dev_id = request.params.get('dev_id', None)
     if dev_id is None:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    dev_info = g_redis_op.getDeviceInfoByImei(imei)
+    dev_info = g_redis_op.getDeviceInfoById(dev_id)
     if dev_info is None or len(dev_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data

@@ -178,3 +178,20 @@ def searchEntByLName(): #todo, support vague query
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
     return errcode, data
+
+@route('/ent/getRunInfoByEid')
+def getRunInfoByEid():
+    errcode, data = ErrCode.ErrOK, {}
+    eid = request.params.get('eid', None)
+    if eid is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), eid)
+    if not is_ancestor and int(login_id) != eid:
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
+    run_infos = g_redis_op.getDeviceRunInfos(customer.dev_ids)
+    data = run_infos
+    return errcode, data

@@ -20,3 +20,7 @@ class RedisOp():
     def getDeviceInfoByImei(self, imei):
         dev_id = self.redis.get('imei:{}'.format(imei))
         return self.getDeviceInfoById(dev_id)
+
+    def getDeviceRunInfoById(self, dev_id):
+        run_info = self.redis.get('devruninfo:{}'.format(dev_id))
+        return run_info

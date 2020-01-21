@@ -49,3 +49,26 @@ def searchDeviceByImei():
         return errcode, data
     data = dev_info
     return errcode, data
+
+@route('/device/getRunInfoByDevid')
+def getGpsInfoByDevid():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    if dev_id is None:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    dev_info = g_redis_op.getDeviceInfoByImei(imei)
+    if dev_info is None or len(dev_info) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    if not is_ancestor and int(login_id) != dev_info['eid']:
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    run_info = g_redis_op.getDeviceRunInfoById(dev_id)
+    if run_info is None or len(run_info) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    data = run_info
+    return errcode, data

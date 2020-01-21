@@ -15,6 +15,11 @@ class CustomerTree():
             node.total_dev_num = node.total_dev_num + 1
             node = node.parent
 
+    def rem_devnum_upwards(self, node):
+        while node is not None:
+            node.total_dev_num = node.total_dev_num - 1
+            node = node.parent
+
     def init_fromdb(self):
         ent_gen = self.data_source.load_all_ent()
         for ent in ent_gen:
@@ -48,7 +53,13 @@ class CustomerTree():
         g_logger.info(RenderTree(self.root))
 
     def insert_device(self, event):
-        print('insert device')
+        with self.lock.gen_wlock():
+            owner = search.find_by_attr(self.root, name='id', value=event['eid'])
+            if owner is None:
+                g_logger.error('eid:{} invalid, event:{}'.format(event['eid'], event))
+                return
+            owner.dev_ids.add(event['dev_id'])
+            self.add_devnum_upwards(owner)
 
     def insert_ent(self, event):
         with self.lock.gen_wlock():
@@ -62,7 +73,24 @@ class CustomerTree():
         self.dump_tree()
 
     def update_device(self, event):
-        print('update device')
+        old_eid = event.get('old_eid', None)
+        if old_eid is None:
+            g_logger.info('old_eid is none {}'.format(old_eid))
+            return
+        with self.lock.gen_wlock():
+            old_owner = search.find_by_attr(self.root, name='id', value=event['old_eid'])
+            if old_owner is None:
+                g_logger.error('eid:{} invalid, event:{}'.format(event['eid'], event))
+                return
+            old_owner.dev_ids.remove(event['dev_id'])
+            self.rem_devnum_upwards(old_owner)
+            new_owner = search.find_by_attr(self.root, name='id', value=event['eid'])
+            if new_owner is None:
+                g_logger.error('eid:{} invalid, event:{}'.format(event['eid'], event))
+                return
+            new_owner.dev_ids.add(event['dev_id'])
+            self.add_devnum_upwards(new_owner)
+
 
     def update_ent(self, event):
         with self.lock.gen_wlock():
@@ -88,7 +116,14 @@ class CustomerTree():
 
 
     def delete_device(self, event):
-        print('delete device')
+        with self.lock.gen_wlock():
+            owner = search.find_by_attr(self.root, name='id', value=event['eid'])
+            if owner is None:
+                g_logger.error('eid:{} invalid, event:{}'.format(event['eid'], event))
+                return
+            owner.dev_ids.remove(event['dev_id'])
+            self.rem_devnum_upwards(owner)
+
 
     def delete_ent(self, event):
         with self.lock.gen_wlock():

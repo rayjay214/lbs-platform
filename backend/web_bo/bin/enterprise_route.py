@@ -187,11 +187,15 @@ def getRunInfoByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), eid)
-    if not is_ancestor and int(login_id) != eid:
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(eid))
+    if not is_ancestor and int(login_id) != int(eid):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     customer = g_ctree_op.getCustomerInfoByEid(int(eid))
     run_infos = g_redis_op.getDeviceRunInfos(customer.dev_ids)
+    g_logger.info('run:{}, dev_ids:{}'.format(run_infos, customer.dev_ids))
+    if run_infos is None or len(run_infos) == 0 or len(run_infos[0]) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
     data = run_infos
     return errcode, data

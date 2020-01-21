@@ -44,7 +44,7 @@ def searchDeviceByImei():
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
     is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
-    if not is_ancestor and int(login_id) != dev_info['eid']:
+    if not is_ancestor and int(login_id) != int(dev_info['eid']):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     data = dev_info
@@ -63,7 +63,7 @@ def getRunInfoByDevid():
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
-    if not is_ancestor and int(login_id) != dev_info['eid']:
+    if not is_ancestor and int(login_id) != int(dev_info['eid']):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     run_info = g_redis_op.getDeviceRunInfoById(dev_id)

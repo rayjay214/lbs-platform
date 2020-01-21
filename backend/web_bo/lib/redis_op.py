@@ -29,4 +29,5 @@ class RedisOp():
         for dev_id in dev_ids:
             self.pipe.hgetall('devruninfo:{}'.format(dev_id))
         run_infos = self.pipe.execute()
-        return run_infos
+        filtered_run_infos = [i for i in run_infos if len(i) > 0]
+        return filtered_run_infos

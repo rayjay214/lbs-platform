@@ -149,7 +149,7 @@ def getSubDeviceInfo():
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    customer = g_ctree_op.getCustomInfoByEid(int(eid))
+    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
     dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids, int(pageno), int(pagesize))
     data['total_cnt'] = len(customer.dev_ids)
     data['records'] = dev_infos

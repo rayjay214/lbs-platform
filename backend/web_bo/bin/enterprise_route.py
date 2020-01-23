@@ -74,7 +74,7 @@ def addEnt():
         return errcode, data
     errcode = g_db_w.add_ent(ent)
     if errcode == ErrCode.ErrOK:
-        passwd, eid = g_db_r.get_entinfo_by_login_name(ent['login_name'])
+        passwd, eid = g_db_w.get_entinfo_by_login_name(ent['login_name'])
         data['eid'] = eid
     return errcode, data
 

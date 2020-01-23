@@ -73,7 +73,9 @@ def addEnt():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     errcode = g_db_w.add_ent(ent)
-    data['msg'] = ErrMsg[errcode]
+    if errcode == ErrCode.ErrOK:
+        customer = g_ctree_op.getCustomerInfoByLName(ent['login_name'])
+        data['eid'] = customer.eid
     return errcode, data
 
 #peek a generator, mainly used to check if it is empty

@@ -26,7 +26,7 @@ def importDevices():
     for row in rows:
         # imei, dev_name, eid, product_type
         insert_data = (str(row), 'YJ-' + str(row)[-5:], int(target_eid), str(product_type))
-        insert_rows.append(row)
+        insert_rows.append(insert_data)
     errcode = g_db_w.imoort_devices(insert_rows)
     return errcode, data
 
@@ -71,4 +71,27 @@ def getRunInfoByDevid():
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     data = run_info
+    return errcode, data
+
+@route('/device/getBmsInfoByDevid')
+def getBmsInfoByDevid():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    if dev_id is None:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    dev_info = g_redis_op.getDeviceInfoById(dev_id)
+    if dev_info is None or len(dev_info) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    if not is_ancestor and int(login_id) != int(dev_info['eid']):
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    bms_info = g_redis_op.getBmsInfoById(dev_id)
+    if bms_info is None or len(bms_info) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    data = bms_info
     return errcode, data

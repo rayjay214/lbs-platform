@@ -136,7 +136,7 @@ def enterprise_login():
     #response.status = 302
 
     if eid == 8888:
-        data['url'] = '/home/importDevice'
+        data['url'] = '/home/yjcenter'
     else:
         data['url'] = '/home'
     return errcode, data

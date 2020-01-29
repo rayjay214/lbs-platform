@@ -48,6 +48,16 @@ def searchDeviceByImei():
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     data = dev_info
+    # get ancestor info
+    ancestor, channel = g_ctree_op.getAncestorInfo(int(dev_info['eid']))
+    ancestors = []
+    for node in ancestor:
+        info = {'eid': node.eid,
+                'text': '''{}({}/{})'''.format(node.login_name, node.own_dev_num, node.total_dev_num),
+                'addr': node.addr, 'phone': node.phone, 'email': node.email}
+        ancestors.append(info)
+    data['ancestors'] = ancestors
+    channel.close()
     return errcode, data
 
 @route('/device/getRunInfoByDevid')

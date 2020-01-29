@@ -38,3 +38,10 @@ class CtreeOp():
                 if cust.eid == ancestor:
                     return True
             return False
+
+    def getAncestorInfo(self, eid):
+        channel = grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port))
+        stub = customer_tree_pb2_grpc.CTreeStub(channel)
+        customer_info = customer_tree_pb2.CustomerInfo(eid=eid)
+        ancestors = stub.getAncestorsInfo(customer_info)
+        return ancestors, channel

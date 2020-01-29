@@ -139,7 +139,6 @@ def updateEnt():
     errcode = g_db_w.update_ent(ent)
     return errcode, data
 
-
 @route('/ent/getSubDeviceInfo')
 def getSubDeviceInfo():
     errcode, data = ErrCode.ErrOK, {}
@@ -179,6 +178,16 @@ def searchEntByLName(): #todo, support vague query
     data['addr'] = customer.addr
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
+    #get ancestor info
+    ancestor, channel = g_ctree_op.getAncestorInfo(customer.eid)
+    ancestors = []
+    for node in ancestor:
+        info = {'eid': node.eid,
+                'text': '''{}({}/{})'''.format(node.login_name, node.own_dev_num, node.total_dev_num),
+                'addr': node.addr, 'phone': node.phone, 'email': node.email}
+        ancestors.append(info)
+    data['ancestors'] = ancestors
+    channel.close()
     return errcode, data
 
 @route('/ent/getRunInfoByEid')

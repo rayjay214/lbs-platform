@@ -92,3 +92,36 @@ class BusinessDb(BaseDb):
         except Exception as e:
             g_logger.error(e)
             return ErrCode.ErrMysqlError
+
+    def get_cmdlist_by_type(self, product_type):
+        self.check()
+        sql = ''' SELECT t2.* FROM t_type_cmd t1
+                INNER JOIN t_cmd_format t2 ON t1.cmd_id = t2.cmd_id
+                =WHERE t1.product_type = '{}';
+        '''.format(product_type)
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(sql)
+                g_logger.info(cursor._executed)
+                rows = cursor.fetchall()
+                cmds = []
+                for row in rows:
+                    cmd = {
+                        'cmd_id': row[0],
+                        'name': row[1],
+                        'tw_name': row[2],
+                        'en_name': row[3],
+                        'pri': row[4],
+                        'head': row[5],
+                        'tail': row[6],
+                        'sp': row[7],
+                        'check': row[8],
+                        'group': row[9],
+                        'remark': row[10],
+                        'param': row[11]
+                    }
+                    cmds.append(cmd)
+                return ErrCode.ErrOK, cmds
+        except Exception as e:
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError, None

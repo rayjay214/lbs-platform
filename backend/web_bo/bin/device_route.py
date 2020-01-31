@@ -88,7 +88,7 @@ def getBmsInfoByDevid():
     errcode, data = ErrCode.ErrOK, {}
     dev_id = request.params.get('dev_id', None)
     if dev_id is None:
-        errcode = ErrCode.ErrDataNotFound
+        errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
     dev_info = g_redis_op.getDeviceInfoById(dev_id)
@@ -105,3 +105,17 @@ def getBmsInfoByDevid():
         return errcode, data
     data = bms_info
     return errcode, data
+
+@route('/device/getCmdListByType')
+def getCmdListByType():
+    errcode, data = ErrCode.ErrOK, {}
+    product_type = request.params.get('product_type', None)
+    if product_type is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    errcode, cmd_list = g_db_r.get_cmdlist_by_type(product_type)
+    if errcode != ErrCode.ErrOK:
+        return errcode, data
+    data = cmd_list
+    return errcode, data
+

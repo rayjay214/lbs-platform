@@ -9,6 +9,7 @@ from globals import g_cfg, g_logger
 from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w, g_kafka_op
 import traceback
 import dev_pb2
+import chardet
 
 @route('/device/importDevices')
 def importDevices():
@@ -124,9 +125,12 @@ def sendCmd():
     errcode, data = ErrCode.ErrOK, {}
     dev_id = request.params.get('dev_id', None)
     cmd_id = request.params.get('cmd_id', None)
-    cmd_name = request.params.get('cmd_name', None)
+    cmd_name = request.params.cmd_name  #has to be this way, refer to https://segmentfault.com/q/1010000008386616
     cmd_content = request.params.get('cmd_content', None)
-    if None in (dev_id, cmd_id, cmd_name, cmd_content):
+    if None in (dev_id, cmd_id, cmd_content):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    if cmd_name is None or cmd_name == '':
         errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
@@ -141,7 +145,7 @@ def sendCmd():
     dev_info = g_redis_op.getDeviceInfoById(dev_id)
     down_devmsg = dev_pb2.DownDevMsg()
     down_devmsg.msgtype = dev_pb2.MsgType.kCommandReq
-    down_devmsg.cmdreq.id = dev_id
+    down_devmsg.cmdreq.id = int(dev_id)
     down_devmsg.cmdreq.imei = dev_info['imei']
     down_devmsg.cmdreq.seq = id
     down_devmsg.cmdreq.reqtime = arrow.now().timestamp

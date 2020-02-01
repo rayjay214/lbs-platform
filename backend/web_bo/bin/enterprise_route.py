@@ -64,9 +64,9 @@ def addEnt():
     errcode, data = ErrCode.ErrOK, {}
     ent = {}
     ent['pid'] = request.params.get('pid', None)
-    ent['login_name'] = request.params.get('login_name', None)
+    ent['login_name'] = request.params.login_name if len(request.params.login_name) != 0 else None
     ent['pwd'] = request.params.get('pwd', None)
-    ent['addr'] = request.params.get('addr', '')
+    ent['addr'] = request.params.addr
     ent['email'] = request.params.get('email', '')
     ent['phone'] = request.params.get('phone', '')
     if None in (ent['pid'], ent['login_name'], ent['pwd']):
@@ -122,7 +122,7 @@ def updateEnt():
     eid = request.params.get('eid', None)
     pid = request.params.get('pid', None)
     phone = request.params.get('phone', None)
-    addr = request.params.get('addr', None)
+    addr = request.params.addr if len(request.params.addr) != 0 else None
     email  = request.params.get('email', None)
     if eid is None:
         g_logger.warn('eid is none')

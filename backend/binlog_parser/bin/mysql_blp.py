@@ -75,6 +75,9 @@ class BLPConsumer(threading.Thread):
 
     def process_event(self, event):
         topic = self.setting.get(event['table'])
+        if topic is None:
+            g_logger.info('no need to process table {}'.format(event['table']))
+            return
         json_str = json.dumps(event, ensure_ascii=False, default=self.myconverter)
         #logger.info('topic is {}'.format(topic))
         g_logger.info(json_str)

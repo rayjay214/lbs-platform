@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package YunJi;
+
+enum MsgType
+{
+    kInalidMsg = 0;
+    kGpsMsg = 1;
+    kLbsMsg = 2;
+    kWifiMsg = 3;
+    kHbMsg = 4;
+    kAlarmMsg = 5;
+    kCommandReq = 6;
+    kCommandRsp = 7;
+    kIccidMsg = 8;
+};
+
+message GpsMsg
+{
+    uint64 id = 1;
+    string imei = 2;
+    uint64 datetime = 3;
+    uint64 systime = 4;
+    sint32 lng = 5;
+    sint32 lat = 6;
+    sint32 speed = 7;
+    sint32 route = 8;
+    sint32 seq = 9;
+    bytes status = 10;
+    map<string,bytes> ext = 11;  //扩展数据
+};
+
+message HbMsg
+{
+    uint64 id = 1;
+    string imei = 2;
+    uint64 hearttime = 3;
+    sint32 seq = 4;
+    bytes status= 5;
+};
+
+message AlarmMsg
+{
+    uint64 id = 1;
+    string imei = 2;
+    uint64 alarmtime = 3;
+    sint32 alarmtype = 4;
+    sint32 lng = 5;
+    sint32 lat = 6;
+    sint32 speed = 7;
+    sint32 route = 8;
+    bytes status= 9;
+};
+
+message CommandReq
+{
+    uint64 id = 1;
+    string imei = 2;
+    sint32 seq = 3;
+    uint64 reqtime = 4;
+    string protocol = 5;
+    string content = 6;
+};
+
+message CommandRsp
+{
+    uint64 id = 1;
+    string imei = 2;
+    sint32 seq = 3;
+    uint64 rsptime=4;
+    string rsp = 5;
+};
+
+message IccidMsg
+{
+    uint64 id = 1;
+    string imei = 2;
+    sint32 seq = 3;
+    string iccid = 4;
+};
+
+message LbsMsg
+{
+    uint64 id = 1;
+    string imei = 2;
+    sint32 seq = 3;
+    uint64 datetime = 4;
+    uint64 systime = 5;
+    string ta = 6;
+    string mcc = 7;
+    string mnc = 8;
+    message LbsInfo
+    {
+        string lac = 1;
+        string ci = 2;
+        sint32 rssi = 3;
+    }
+    repeated LbsInfo lbsinfo = 9;
+};
+
+message WifiMsg
+{
+    uint64 id = 1;
+    string imei = 2;
+    sint32 seq = 3;
+    uint64 datetime = 4;
+    uint64 systime = 5;
+    message WifiInfo
+    {
+        string ssid = 1;
+        sint32 rssi = 2;
+    }
+    repeated WifiInfo wifiinfo = 6;
+};
+
+
+message UpDevMsg
+{
+    MsgType msgtype = 1;
+    oneof msgbody
+    {
+        GpsMsg gps =2;
+        HbMsg hb = 3;
+        AlarmMsg alarm = 4;
+        CommandRsp cmdrsp = 5;
+        IccidMsg iccid = 6;
+        LbsMsg lbs = 7;
+        WifiMsg wifi = 8;
+    };
+};
+
+message DownDevMsg
+{
+    MsgType msgtype = 1;
+    CommandReq cmdreq = 2;
+};

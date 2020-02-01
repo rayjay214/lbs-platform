@@ -97,7 +97,7 @@ class BusinessDb(BaseDb):
         self.check()
         sql = ''' SELECT t2.* FROM t_type_cmd t1
                 INNER JOIN t_cmd_format t2 ON t1.cmd_id = t2.cmd_id
-                =WHERE t1.product_type = '{}';
+                WHERE t1.product_type = '{}';
         '''.format(product_type)
         try:
             with self.conn.cursor() as cursor:
@@ -125,3 +125,19 @@ class BusinessDb(BaseDb):
         except Exception as e:
             g_logger.error(e)
             return ErrCode.ErrMysqlError, None
+
+    def insert_cmd_history(self, cmd_info: dict):
+        self.check()
+        sql = '''insert into t_cmd_history(dev_id, eid, cmd_name, cmd_content, cmd_id)
+            values ({}, {}, '{}', '{}', {})
+        '''.format(cmd_info['dev_id'], cmd_info['eid'], cmd_info['cmd_name'], cmd_info['cmd_content'], cmd_info['cmd_id'])
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(sql)
+                g_logger.debug(cursor._executed)
+                self.conn.commit()
+                id = cursor.lastrowid
+                return ErrCode.ErrOK, id
+        except Exception as e:
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError, 0

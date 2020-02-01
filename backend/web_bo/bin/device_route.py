@@ -6,9 +6,9 @@ import arrow
 from bottle import install, request, route, response
 from constants import ErrMsg, ErrCode
 from globals import g_cfg, g_logger
-from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w
+from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w, g_kafka_op
 import traceback
-
+import dev_pb2
 
 @route('/device/importDevices')
 def importDevices():
@@ -119,3 +119,33 @@ def getCmdListByType():
     data = cmd_list
     return errcode, data
 
+@route('/device/sendCmd')
+def sendCmd():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    cmd_id = request.params.get('cmd_id', None)
+    cmd_name = request.params.get('cmd_name', None)
+    cmd_content = request.params.get('cmd_content', None)
+    if None in (dev_id, cmd_id, cmd_name, cmd_content):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    #insert t_cmd_history
+    cmd_info = {'dev_id':dev_id, 'cmd_id':cmd_id, 'cmd_name':cmd_name,
+            'cmd_content':cmd_content, 'eid':login_id}
+    errcode, id = g_db_w.insert_cmd_history(cmd_info)
+    if errcode != ErrCode.ErrOK:
+        return errcode, data
+    data['id'] = id
+    #write to kafka for cmd_handler module
+    dev_info = g_redis_op.getDeviceInfoById(dev_id)
+    down_devmsg = dev_pb2.DownDevMsg()
+    down_devmsg.msgtype = dev_pb2.MsgType.kCommandReq
+    down_devmsg.cmdreq.id = dev_id
+    down_devmsg.cmdreq.imei = dev_info['imei']
+    down_devmsg.cmdreq.seq = id
+    down_devmsg.cmdreq.reqtime = arrow.now().timestamp
+    down_devmsg.cmdreq.content = cmd_content
+    str = down_devmsg.SerializeToString()
+    g_kafka_op.produce_cmd(str)
+    return errcode, data

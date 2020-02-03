@@ -6,11 +6,20 @@ import arrow
 from bottle import install, request, route, response
 from constants import ErrMsg, ErrCode
 from globals import g_cfg, g_logger
-from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w
 from businessdb import BusinessDb
 import traceback
 from customer_tree_pb2 import CustomerInfo
 import itertools
+from ctree_op import CtreeOp
+from redis_op import RedisOp
+from businessdb import BusinessDb
+from kafka_op import KafkaOp
+
+ctree_op = CtreeOp(g_cfg['ctree'])
+redis_op = RedisOp(g_cfg['redis'])
+db_r = BusinessDb(g_cfg['db_business_r'])
+db_w = BusinessDb(g_cfg['db_business_w'])
+kafka_op = KafkaOp(g_cfg['kafka'])
 
 @route('/ent/getEntInfoByEid')
 def getEntInfoByEid():
@@ -19,7 +28,8 @@ def getEntInfoByEid():
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
     if customer.eid == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
@@ -40,7 +50,8 @@ def getEntChildrenByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     records = []
-    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
     data['eid'] = customer.eid
     data['pid'] = customer.pid
     data['text'] = '''{}({}/{})'''.format(customer.login_name, customer.own_dev_num, customer.total_dev_num)
@@ -48,7 +59,7 @@ def getEntChildrenByEid():
     data['addr'] = customer.addr
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
-    children, channel = g_ctree_op.getChildrenInfoByEid(int(eid))  #caller have to close channel manually
+    children, channel = ctree_op.getChildrenInfoByEid(int(eid))  #caller have to close channel manually
     for child in children:
         info = {'eid': child.eid,
                 'text': '''{}({}/{})'''.format(child.login_name, child.own_dev_num, child.total_dev_num),
@@ -72,9 +83,10 @@ def addEnt():
     if None in (ent['pid'], ent['login_name'], ent['pwd']):
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    errcode = g_db_w.add_ent(ent)
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.add_ent(ent)
     if errcode == ErrCode.ErrOK:
-        passwd, eid = g_db_w.get_entinfo_by_login_name(ent['login_name'])
+        passwd, eid = db_w.get_entinfo_by_login_name(ent['login_name'])
         data['eid'] = eid
     return errcode, data
 
@@ -95,16 +107,17 @@ def deleteEnt():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(ent['eid']))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(ent['eid']))
     if not is_ancestor:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     #the ent can be deleted only if it has no sub children and no devices attached
-    customer = g_ctree_op.getCustomerInfoByEid(int(ent['eid']))
+    customer = ctree_op.getCustomerInfoByEid(int(ent['eid']))
     if customer.own_dev_num > 0:
         errcode = ErrCode.ErrEntHasDevice
         return errcode, data
-    children, channel = g_ctree_op.getChildrenInfoByEid(int(ent['eid']))
+    children, channel = ctree_op.getChildrenInfoByEid(int(ent['eid']))
     res = peek(children)
     if res is None:
         g_logger.info('{} has no children accounts'.format(ent['eid']))
@@ -112,7 +125,8 @@ def deleteEnt():
         channel.close()
         errcode = ErrCode.ErrEntHasChildren
         return errcode, data
-    errcode = g_db_w.delete_ent(ent)
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.delete_ent(ent)
     channel.close()
     return errcode, data
 
@@ -128,7 +142,8 @@ def updateEnt():
         g_logger.warn('eid is none')
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    errcode, ent = g_db_r.get_ent_by_eid(eid)
+    db_r = BusinessDb(g_cfg['db_business_r'])
+    errcode, ent = db_r.get_ent_by_eid(eid)
     if errcode != ErrCode.ErrOK:
         data['msg'] = ErrMsg[errcode]
         return errcode, data
@@ -136,7 +151,8 @@ def updateEnt():
     ent['phone'] = phone if phone is not None else ent['phone']
     ent['addr'] = addr if addr is not None else ent['addr']
     ent['email'] = email if email is not None else ent['email']
-    errcode = g_db_w.update_ent(ent)
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.update_ent(ent)
     return errcode, data
 
 @route('/ent/getSubDeviceInfo')
@@ -148,8 +164,10 @@ def getSubDeviceInfo():
     if eid is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
-    dev_infos = g_redis_op.getDeviceInfos(customer.dev_ids, int(pageno), int(pagesize))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    redis_op = RedisOp(g_cfg['redis'])
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
+    dev_infos = redis_op.getDeviceInfos(customer.dev_ids, int(pageno), int(pagesize))
     data['total_cnt'] = len(customer.dev_ids)
     data['records'] = dev_infos
     return errcode, data
@@ -161,13 +179,14 @@ def searchEntByLName(): #todo, support vague query
     if login_name is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    customer = g_ctree_op.getCustomerInfoByLName(login_name)
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    customer = ctree_op.getCustomerInfoByLName(login_name)
     if customer.eid == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     #check permission
     login_id = request.params.get('LOGIN_ID')
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), customer.eid)
+    is_ancestor = ctree_op.isAncestor(int(login_id), customer.eid)
     if not is_ancestor and int(login_id) != customer.eid:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
@@ -179,7 +198,7 @@ def searchEntByLName(): #todo, support vague query
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
     #get ancestor info
-    ancestor, channel = g_ctree_op.getAncestorInfo(customer.eid)
+    ancestor, channel = ctree_op.getAncestorInfo(customer.eid)
     ancestors = []
     for node in ancestor:
         info = {'eid': node.eid,
@@ -198,12 +217,14 @@ def getRunInfoByEid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(eid))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(eid))
     if not is_ancestor and int(login_id) != int(eid):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
-    customer = g_ctree_op.getCustomerInfoByEid(int(eid))
-    run_infos = g_redis_op.getDeviceRunInfos(customer.dev_ids)
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
+    redis_op = RedisOp(g_cfg['redis'])
+    run_infos = redis_op.getDeviceRunInfos(customer.dev_ids)
     g_logger.info('run:{}, dev_ids:{}'.format(run_infos, customer.dev_ids))
     if run_infos is None or len(run_infos) == 0 or len(run_infos[0]) == 0:
         errcode = ErrCode.ErrDataNotFound

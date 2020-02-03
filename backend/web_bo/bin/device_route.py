@@ -6,10 +6,13 @@ import arrow
 from bottle import install, request, route, response
 from constants import ErrMsg, ErrCode
 from globals import g_cfg, g_logger
-from external_op import g_ctree_op, g_redis_op, g_db_r, g_db_w, g_kafka_op
 import traceback
 import dev_pb2
 import chardet
+from ctree_op import CtreeOp
+from redis_op import RedisOp
+from businessdb import BusinessDb
+from kafka_op import KafkaOp
 
 @route('/device/importDevices')
 def importDevices():
@@ -28,7 +31,8 @@ def importDevices():
         # imei, dev_name, eid, product_type
         insert_data = (str(row), 'YJ-' + str(row)[-5:], int(target_eid), str(product_type))
         insert_rows.append(insert_data)
-    errcode = g_db_w.imoort_devices(insert_rows)
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.imoort_devices(insert_rows)
     return errcode, data
 
 
@@ -39,18 +43,20 @@ def searchDeviceByImei():
     if imei is None:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
-    dev_info = g_redis_op.getDeviceInfoByImei(imei)
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_info = redis_op.getDeviceInfoByImei(imei)
     if dev_info is None or len(dev_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
     if not is_ancestor and int(login_id) != int(dev_info['eid']):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     data = dev_info
     # get ancestor info
-    ancestor, channel = g_ctree_op.getAncestorInfo(int(dev_info['eid']))
+    ancestor, channel = ctree_op.getAncestorInfo(int(dev_info['eid']))
     ancestors = []
     for node in ancestor:
         info = {'eid': node.eid,
@@ -69,15 +75,17 @@ def getRunInfoByDevid():
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    dev_info = g_redis_op.getDeviceInfoById(dev_id)
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_info = redis_op.getDeviceInfoById(dev_id)
     if dev_info is None or len(dev_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
     if not is_ancestor and int(login_id) != int(dev_info['eid']):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
-    run_info = g_redis_op.getDeviceRunInfoById(dev_id)
+    run_info = redis_op.getDeviceRunInfoById(dev_id)
     if run_info is None or len(run_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
@@ -104,15 +112,17 @@ def getBmsInfoByDevid():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     login_id = request.params.get('LOGIN_ID')
-    dev_info = g_redis_op.getDeviceInfoById(dev_id)
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_info = redis_op.getDeviceInfoById(dev_id)
     if dev_info is None or len(dev_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
-    is_ancestor = g_ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
     if not is_ancestor and int(login_id) != int(dev_info['eid']):
         errcode = ErrCode.ErrNoPermission
         return errcode, data
-    bms_info = g_redis_op.getBmsInfoById(dev_id)
+    bms_info = redis_op.getBmsInfoById(dev_id)
     if bms_info is None or len(bms_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
@@ -126,7 +136,8 @@ def getCmdListByType():
     if product_type is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    errcode, cmd_list = g_db_r.get_cmdlist_by_type(product_type)
+    db_r = BusinessDb(g_cfg['db_business_r'])
+    errcode, cmd_list = db_r.get_cmdlist_by_type(product_type)
     if errcode != ErrCode.ErrOK:
         return errcode, data
     data = cmd_list
@@ -149,12 +160,14 @@ def sendCmd():
     #insert t_cmd_history
     cmd_info = {'dev_id':dev_id, 'cmd_id':cmd_id, 'cmd_name':cmd_name,
             'cmd_content':cmd_content, 'eid':login_id}
-    errcode, id = g_db_w.insert_cmd_history(cmd_info)
+    db_w = BusinessDb(g_cfg['db_business_r'])
+    errcode, id = db_w.insert_cmd_history(cmd_info)
     if errcode != ErrCode.ErrOK:
         return errcode, data
     data['id'] = id
     #write to kafka for cmd_handler module
-    dev_info = g_redis_op.getDeviceInfoById(dev_id)
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_info = redis_op.getDeviceInfoById(dev_id)
     down_devmsg = dev_pb2.DownDevMsg()
     down_devmsg.msgtype = dev_pb2.MsgType.kCommandReq
     down_devmsg.cmdreq.id = int(dev_id)
@@ -163,5 +176,6 @@ def sendCmd():
     down_devmsg.cmdreq.reqtime = arrow.now().timestamp
     down_devmsg.cmdreq.content = cmd_content
     str = down_devmsg.SerializeToString()
-    g_kafka_op.produce_cmd(str)
+    kafka_op = KafkaOp(g_cfg['kafka'])
+    kafka_op.produce_cmd(str)
     return errcode, data

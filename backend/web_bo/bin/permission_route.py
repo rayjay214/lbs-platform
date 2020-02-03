@@ -8,8 +8,7 @@ from bottle import install, request, route, response
 import MySQLdb
 import requests
 from constants import ErrMsg, ErrCode
-from globals import g_cfg
-from globals import g_logger
+from globals import g_cfg, g_logger
 import hashlib
 from businessdb import BusinessDb
 import traceback

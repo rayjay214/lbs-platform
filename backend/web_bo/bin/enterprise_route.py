@@ -40,6 +40,7 @@ def getEntInfoByEid():
     data['addr'] = customer.addr
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
+    data['permission'] = customer.permission
     return errcode, data
 
 @route('/ent/getEntChildrenByEid')
@@ -59,6 +60,7 @@ def getEntChildrenByEid():
     data['addr'] = customer.addr
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
+    data['permission'] = customer.permission
     children, channel = ctree_op.getChildrenInfoByEid(int(eid))  #caller have to close channel manually
     for child in children:
         info = {'eid': child.eid,
@@ -138,6 +140,7 @@ def updateEnt():
     phone = request.params.get('phone', None)
     addr = request.params.addr if len(request.params.addr) != 0 else None
     email  = request.params.get('email', None)
+    permission = request.params.get('permission', None)
     if eid is None:
         g_logger.warn('eid is none')
         errcode = ErrCode.ErrLackParam
@@ -151,6 +154,7 @@ def updateEnt():
     ent['phone'] = phone if phone is not None else ent['phone']
     ent['addr'] = addr if addr is not None else ent['addr']
     ent['email'] = email if email is not None else ent['email']
+    ent['permission'] = permission if permission is not None else ent['permission']
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_ent(ent)
     return errcode, data

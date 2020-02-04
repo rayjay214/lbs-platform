@@ -31,7 +31,8 @@ class BusinessDb(BaseDb):
                     'login_name' : row[3],
                     'pwd' : row[4],
                     'addr' : row[5],
-                    'email' : row[6]
+                    'email' : row[6],
+                    'permission' : row[7]
                 }
                 return ErrCode.ErrOK, ent
         except Exception as e:
@@ -68,8 +69,9 @@ class BusinessDb(BaseDb):
 
     def update_ent(self, ent: dict):
         self.check()
-        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}' where eid={};
-            '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'], ent['eid'])
+        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}', permission='{}'
+                 where eid={};
+            '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'], ent['eid'], ent['permission'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)

@@ -7,7 +7,7 @@ from bottle import install, request, route, response
 from constants import ErrMsg, ErrCode
 from globals import g_cfg, g_logger
 import traceback
-import dev_pb2
+from dev_pb2 import DownDevMsg, MsgType
 import chardet
 from ctree_op import CtreeOp
 from redis_op import RedisOp
@@ -168,8 +168,8 @@ def sendCmd():
     #write to kafka for cmd_handler module
     redis_op = RedisOp(g_cfg['redis'])
     dev_info = redis_op.getDeviceInfoById(dev_id)
-    down_devmsg = dev_pb2.DownDevMsg()
-    down_devmsg.msgtype = dev_pb2.MsgType.kCommandReq
+    down_devmsg = DownDevMsg()
+    down_devmsg.msgtype = MsgType.kCommandReq
     down_devmsg.cmdreq.id = int(dev_id)
     down_devmsg.cmdreq.imei = dev_info['imei']
     down_devmsg.cmdreq.seq = id

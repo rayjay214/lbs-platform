@@ -6,10 +6,17 @@ import json
 class KafkaConsumer(threading.Thread):
     def __init__(self, ctree):
         threading.Thread.__init__(self)
+        self.conf = {}
+        self.conf['bootstrap.servers'] = g_cfg['KAFKA']['broker']
+        self.conf['group.id'] = g_cfg['KAFKA']['group']
+        self.conf['auto.offset.reset'] = 'smallest'
+        self.consumer = Consumer(self.conf)
+        '''
         self.consumer =  Consumer({
             'bootstrap.servers': g_cfg['KAFKA']['broker'],
             'group.id': g_cfg['KAFKA']['group'],
             'auto.offset.reset': 'earliest'})
+        '''
         self.ctree = ctree
 
     def get_handler(self, action, table):
@@ -39,17 +46,18 @@ class KafkaConsumer(threading.Thread):
     def run(self):
         self.consumer.subscribe(g_cfg['KAFKA']['topic'].split(','))
         while True:
-            msg = self.consumer.poll(2.0)
-            if msg:
-                print(msg.value())
-            if msg is None:
-                continue
-            if msg.error():
-                g_logger.info("Consumer error: {}".format(msg.error()))
-                continue
+            try:
+                msg = self.consumer.poll(1)
+                if msg is None:
+                    continue
+                if msg.error():
+                    g_logger.info("Consumer error: {}".format(msg.error()))
+                    continue
 
-            g_logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
-            self.process_msg(msg.value())
+                g_logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
+                self.process_msg(msg.value())
+            except Exception as e:
+                g_logger.error(e)
 
         self.consumer.close()
 

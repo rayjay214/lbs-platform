@@ -92,11 +92,11 @@ def getRunInfoByDevid():
     data = run_info
     #calc dev_status
     data['dev_status'] = 'online'
-    max = max(int(run_info['gps_time']), int(run_info['sys_time']))
+    maxtime = max(int(run_info['gps_time']), int(run_info['sys_time']))
     now = arrow.now().timestamp
-    if now - max > g_cfg['master']['offline_interval']:
+    if now - maxtime > int(g_cfg['master']['offline_interval']):
         data['dev_status'] = 'offline'
-        data['offline_time'] = now - max
+        data['offline_time'] = now - maxtime
         return errcode, data
     static_time = now - int(run_info['sys_time'])
     if static_time > run_info['static_interval']:

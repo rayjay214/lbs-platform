@@ -229,5 +229,21 @@ def getRunInfoByEid():
     if run_infos is None or len(run_infos) == 0 or len(run_infos[0]) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
-    data = run_infos
+    dealt_run_infos = []
+    for info in run_infos:
+        info['dev_status'] = 'online'
+        maxtime = max(int(info['gps_time']), int(info['sys_time']))
+        now = arrow.now().timestamp
+        if now - maxtime > int(g_cfg['master']['offline_interval']):
+            info['dev_status'] = 'offline'
+            info['offline_time'] = now - maxtime
+            dealt_run_infos.append(info)
+            continue
+        static_time = now - int(info['sys_time'])
+        if static_time > info['static_interval']:
+            info['dev_status'] = 'static'
+            info['static_time'] = static_time
+        dealt_run_infos.append(info)
+
+    data = dealt_run_infos
     return errcode, data

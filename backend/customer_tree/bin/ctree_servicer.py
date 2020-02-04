@@ -23,7 +23,8 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
             pid = node.parent.id if node.parent is not None else 0
             info = CustomerInfo(eid=node.id, login_name=node.login_name,
                 phone=node.phone, addr=node.addr, email=node.email, is_leaf=node.is_leaf,
-                own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num, pid=pid)
+                own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num, pid=pid,
+                permission=node.permission)
             for dev_id in dev_ids:
                 info.dev_ids.append(dev_id)
             return info
@@ -38,7 +39,8 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
                 dev_ids = node.dev_ids
                 info = CustomerInfo(eid=node.id, login_name=node.login_name,
                     phone=node.phone, addr=node.addr, email=node.email, is_leaf=node.is_leaf,
-                    own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num)
+                    own_dev_num=len(node.dev_ids), total_dev_num=node.total_dev_num,
+                    permission=node.permission)
                 for dev_id in dev_ids:
                     info.dev_ids.append(dev_id)
                 yield info
@@ -50,7 +52,8 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
             for child in children:
                 info = CustomerInfo(eid=child.id, login_name=child.login_name,
                     phone=child.phone, addr=child.addr, email=child.email, is_leaf=child.is_leaf,
-                    own_dev_num=len(child.dev_ids), total_dev_num=child.total_dev_num)
+                    own_dev_num=len(child.dev_ids), total_dev_num=child.total_dev_num,
+                    permission=child.permission)
                 yield info
 
     def getAncestorsInfo(self, request, context):
@@ -64,7 +67,8 @@ class CTreeServicer(customer_tree_pb2_grpc.CTreeServicer):
             for ances in ancestors:
                 info = CustomerInfo(eid=ances.id, login_name=ances.login_name,
                     phone=ances.phone, addr=ances.addr, email=ances.email,
-                    own_dev_num=len(ances.dev_ids), total_dev_num=ances.total_dev_num)
+                    own_dev_num=len(ances.dev_ids), total_dev_num=ances.total_dev_num,
+                    permission=ances.permission)
                 yield info
 
 class GrpcThread(threading.Thread):

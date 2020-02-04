@@ -26,11 +26,13 @@ class CustomerTree():
             if ent['pid'] == 0:
                 # some interface about dev_ids need to be paged, so it has to be ordered
                 self.root = AnyNode(login_name=ent['login_name'], id=ent['eid'],phone=ent['phone'],
-                                    addr=ent['addr'], email=ent['email'], dev_ids=SortedSet(), total_dev_num=0, parent=None)
+                                    addr=ent['addr'], email=ent['email'], dev_ids=SortedSet(), total_dev_num=0,
+                                    permission=ent['permission'], parent=None)
                 continue
             myparent = search.find_by_attr(self.root, name='id', value=ent['pid'])
             node = AnyNode(login_name=ent['login_name'], id=ent['eid'],phone=ent['phone'],
-                           addr=ent['addr'], email=ent['email'], dev_ids=SortedSet(), total_dev_num=0, parent=myparent)
+                           addr=ent['addr'], email=ent['email'], dev_ids=SortedSet(), total_dev_num=0,
+                           permission=ent['permission'], parent=myparent)
         device_gen = self.data_source.load_all_device()
         cache_node = {}
         for device in device_gen:
@@ -68,7 +70,8 @@ class CustomerTree():
                 g_logger.error('pid:{} invalid, event:{}'.format(event['pid'], event))
                 return
             node = AnyNode(login_name=event['login_name'], id=event['eid'], phone=event['phone'],
-                addr=event['addr'], email=event['email'], dev_ids=set(), total_dev_num=0, parent=parent)
+                addr=event['addr'], email=event['email'], dev_ids=set(), total_dev_num=0,
+                permission=event['permission'], parent=parent)
 
         self.dump_tree()
 
@@ -111,7 +114,9 @@ class CustomerTree():
                 if key.lower() == 'old_email':
                     orig_key = key[4:]
                     node.email = event[orig_key]
-
+                if key.lower() == 'old_permission':
+                    orig_key = key[4:]
+                    node.permission = event[orig_key]
         self.dump_tree()
 
 

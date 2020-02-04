@@ -244,7 +244,7 @@ def getRunInfoByEid():
             dealt_run_infos.append(info)
             continue
         static_time = now - int(info['sys_time'])
-        if static_time > info['static_interval']:
+        if static_time > int(g_cfg['master']['static_interval']):
             info['dev_status'] = 'static'
             info['static_time'] = static_time
         dealt_run_infos.append(info)

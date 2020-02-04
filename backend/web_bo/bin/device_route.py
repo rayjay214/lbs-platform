@@ -99,7 +99,7 @@ def getRunInfoByDevid():
         data['offline_time'] = now - maxtime
         return errcode, data
     static_time = now - int(run_info['sys_time'])
-    if static_time > run_info['static_interval']:
+    if static_time > int(g_cfg['master']['static_interval']):
         data['dev_status'] = 'static'
         data['static_time'] = static_time
     return errcode, data

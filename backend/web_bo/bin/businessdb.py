@@ -18,7 +18,7 @@ class BusinessDb(BaseDb):
 
     def get_ent_by_eid(self, eid) -> tuple:
         self.check()
-        sql = '''select * from t_enterprise where eid={}'''.format(eid)
+        sql = '''select eid,pid,phone,login_name,pwd,addr,email,permission from t_enterprise where eid={}'''.format(eid)
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
@@ -69,9 +69,8 @@ class BusinessDb(BaseDb):
 
     def update_ent(self, ent: dict):
         self.check()
-        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}', permission='{}'
-                 where eid={};
-            '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'], ent['eid'], ent['permission'])
+        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}', permission='{}' where eid={};
+              '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'], ent['permission'], ent['eid'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
@@ -79,6 +78,7 @@ class BusinessDb(BaseDb):
                 self.conn.commit()
                 return ErrCode.ErrOK
         except Exception as e:
+            g_logger.error(sql)
             g_logger.error(e)
             return ErrCode.ErrMysqlError
 

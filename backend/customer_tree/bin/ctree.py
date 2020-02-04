@@ -70,7 +70,7 @@ class CustomerTree():
             node = AnyNode(login_name=event['login_name'], id=event['eid'], phone=event['phone'],
                 addr=event['addr'], email=event['email'], dev_ids=set(), total_dev_num=0, parent=parent)
 
-        self.dump_tree()
+        #self.dump_tree()
 
     def update_device(self, event):
         old_eid = event.get('old_eid', None)
@@ -112,7 +112,7 @@ class CustomerTree():
                     orig_key = key[4:]
                     node.email = event[orig_key]
 
-        self.dump_tree()
+        #self.dump_tree()
 
 
     def delete_device(self, event):
@@ -133,7 +133,7 @@ class CustomerTree():
                 return
             node.parent = None
 
-        self.dump_tree()
+        #self.dump_tree()
 
 
 

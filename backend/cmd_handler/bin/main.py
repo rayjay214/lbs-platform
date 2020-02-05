@@ -1,6 +1,6 @@
 from businessdb import BusinessDb
 from globals import g_logger, g_cfg
-from kafka_handler import CmdReqConsumer, CmdRespConsumer, CmdProducer
+from cmd_handler import CmdReqConsumer, CmdRespConsumer, CmdProducer
 import queue
 
 def main():

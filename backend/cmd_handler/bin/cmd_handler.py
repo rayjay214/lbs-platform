@@ -4,54 +4,93 @@ import sys
 import threading
 import queue
 import time
-from confluent_kafka import Producer
+from confluent_kafka import Producer, Consumer
 from globals import g_logger, g_cfg
-import dev_pb2
+from dev_pb2 import DownDevMsg, MsgType, UpDevMsg
+from redis_op import RedisOp
+import struct
 
-#fetch data from mysql binlog and enqueue
-class CmdProducer(threading.Thread):
-    def __init__(self, name, queue, mysql_setting):
-        threading.Thread.__init__(self, name=name)
+#consume cmd.content from web_bo
+class CmdReqConsumer(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.consumer = Consumer({
+            'bootstrap.servers': g_cfg['kafka']['broker'],
+            'group.id': g_cfg['kafka']['group'],
+            'auto.offset.reset': 'earliest'})
         self.queue = queue
-        self.setting = mysql_setting
-        self.stream = BinLogStreamReader(
-            connection_settings=self.setting,
-            server_id=3,
-            only_events=[DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent],
-            blocking=True,
-            resume_stream=True)
+
+    def get_parser(self, protocol):
+        return {
+            't808' : self.t808_parser
+        }.get(protocol, None)
+
+    def process_msg(self, msg):
+        down_devmsg = DownDevMsg()
+        down_devmsg.ParseFromString(msg)
+        g_logger.info(down_devmsg)
+        redis_op = RedisOp(g_cfg['redis'])
+        dev_info = redis_op.getDeviceInfoByImei(down_devmsg.cmdreq.imei)
+
+        dev_info['product_type']
 
     def run(self):
-        for binlogevent in self.stream:
-            for row in binlogevent.rows:
-                event = {"schema": binlogevent.schema, "table": binlogevent.table}
+        topics = []
+        topics.append(g_cfg['kafka']['cmdreq_topic'])
+        self.consumer.subscribe(topics)
+        while True:
+            try:
+                msg = self.consumer.poll(1)
+                if msg is None:
+                    continue
+                if msg.error():
+                    g_logger.info("Consumer error: {}".format(msg.error()))
+                    continue
 
-                if isinstance(binlogevent, DeleteRowsEvent):
-                    event["action"] = "delete"
-                    event = dict(**row["values"], **event)
-                elif isinstance(binlogevent, UpdateRowsEvent):
-                    event["action"] = "update"
-                    diffs = {'old_'+diff: row["before_values"][diff] for diff in row["before_values"] if row["before_values"][diff] != row["after_values"][diff]}
-                    event = dict(**row["after_values"], **diffs, **event)
-                elif isinstance(binlogevent, WriteRowsEvent):
-                    event["action"] = "insert"
-                    event = dict(**row["values"], **event)
-                #sys.stdout.flush()
-                self.queue.put(event)
+                self.process_msg(msg.value())
+            except Exception as e:
+                g_logger.error(e)
 
-            self.stream.close()
+        self.consumer.close()
 
-#dequeue and write to kafka
-class CmdConsumer(threading.Thread):
-    def __init__(self, name, queue, kafka_setting):
-        threading.Thread.__init__(self, name=name)
+#consume cmd.resp from gw
+class CmdRespConsumer(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.consumer = Consumer({
+            'bootstrap.servers': g_cfg['kafka']['broker'],
+            'group.id': g_cfg['kafka']['group'],
+            'auto.offset.reset': 'earliest'})
+
+    def process_msg(self, str):
+        updev_msg = UpDevMsg()
+        updev_msg.pasreFromString(str)
+        print(updev_msg)
+
+    def run(self):
+        self.consumer.subscribe(list(g_cfg['kafka']['cmdresp_topic']))
+        while True:
+            try:
+                msg = self.consumer.poll(1)
+                if msg is None:
+                    continue
+                if msg.error():
+                    g_logger.info("Consumer error: {}".format(msg.error()))
+                    continue
+
+                g_logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
+                self.process_msg(msg.value())
+            except Exception as e:
+                g_logger.error(e)
+
+        self.consumer.close()
+
+#after constructing binary
+class CmdProducer(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
         self.queue = queue
-        self.setting = kafka_setting
-        self.producer = Producer({'bootstrap.servers': self.setting['broker']})
-
-    def myconverter(self, o):
-        if isinstance(o, datetime.datetime):
-            return o.__str__()
+        self.producer = Producer({'bootstrap.servers': g_cfg['kafka']['broker']})
 
     def run(self):
         while True:
@@ -68,35 +107,8 @@ class CmdConsumer(threading.Thread):
         else:
             g_logger.info('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
 
-
-    def process_event(self, event):
-        topic = self.setting.get(event['table'])
-        json_str = json.dumps(event, ensure_ascii=False, default=self.myconverter)
-        #logger.info('topic is {}'.format(topic))
-        g_logger.info(json_str)
-        self.producer.produce(topic, json_str, callback=self.delivery_report)
-
-if __name__ == "__main__":
-    mysql_setting = {
-        'host': g_cfg['MYSQL']['host'],
-        'port': int(g_cfg['MYSQL']['port']),
-        'user': g_cfg['MYSQL']['user'],
-        'passwd': g_cfg['MYSQL']['passwd']
-    }
-
-    kafka_setting = {
-        't_device' : g_cfg['KAFKA']['t_device'],
-        't_enterprise' : g_cfg['KAFKA']['t_enterprise'],
-        't_fenceinfo' : g_cfg['KAFKA']['t_fenceinfo'],
-        'broker' : g_cfg['KAFKA']['broker']
-    }
-    queue = queue.Queue()
-    blp_producer = BLPProducer('Binlog Parser', queue, mysql_setting)
-    blp_producer.daemon = True
-    blp_consumer = BLPConsumer('kakfa Writer', queue, kafka_setting)
-    blp_consumer.daemon = True
-    blp_producer.start()
-    blp_consumer.start()
-    blp_producer.join()
-    blp_consumer.join()
+    def process_msg(self, msg):
+        topic = self.setting.get(g_cfg['kafka']['cmd_binaryreq_topic'])
+        g_logger.info(msg)
+        self.producer.produce(topic, msg, callback=self.delivery_report)
 

@@ -10,21 +10,23 @@ from dev_pb2 import DownDevMsg, MsgType, UpDevMsg
 
 #consume cmd.content from web_bo
 class CmdReqConsumer(threading.Thread):
-    def __init__(self, name, queue):
-        threading.Thread.__init__(self, name=name)
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
         self.consumer = Consumer({
             'bootstrap.servers': g_cfg['kafka']['broker'],
             'group.id': g_cfg['kafka']['group'],
             'auto.offset.reset': 'earliest'})
         self.queue = queue
 
-    def process_msg(self, str):
+    def process_msg(self, msg):
         down_devmsg = DownDevMsg()
-        down_devmsg.ParseFromString(str)
-        print(down_devmsg)
+        down_devmsg.ParseFromString(msg)
+        g_logger.info(down_devmsg)
 
     def run(self):
-        self.consumer.subscribe(g_cfg['kafka']['cmdreq_topic'])
+        topics = []
+        topics.append(g_cfg['kafka']['cmdreq_topic'])
+        self.consumer.subscribe(topics)
         while True:
             try:
                 msg = self.consumer.poll(1)
@@ -34,7 +36,6 @@ class CmdReqConsumer(threading.Thread):
                     g_logger.info("Consumer error: {}".format(msg.error()))
                     continue
 
-                g_logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
                 self.process_msg(msg.value())
             except Exception as e:
                 g_logger.error(e)
@@ -43,8 +44,8 @@ class CmdReqConsumer(threading.Thread):
 
 #consume cmd.resp from gw
 class CmdRespConsumer(threading.Thread):
-    def __init__(self, name):
-        threading.Thread.__init__(self, name=name)
+    def __init__(self):
+        threading.Thread.__init__(self)
         self.consumer = Consumer({
             'bootstrap.servers': g_cfg['kafka']['broker'],
             'group.id': g_cfg['kafka']['group'],
@@ -56,7 +57,7 @@ class CmdRespConsumer(threading.Thread):
         print(updev_msg)
 
     def run(self):
-        self.consumer.subscribe(g_cfg['kafka']['cmdresp_topic'])
+        self.consumer.subscribe(list(g_cfg['kafka']['cmdresp_topic']))
         while True:
             try:
                 msg = self.consumer.poll(1)
@@ -75,8 +76,8 @@ class CmdRespConsumer(threading.Thread):
 
 #after constructing binary
 class CmdProducer(threading.Thread):
-    def __init__(self, name, queue):
-        threading.Thread.__init__(self, name=name)
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
         self.queue = queue
         self.producer = Producer({'bootstrap.servers': g_cfg['kafka']['broker']})
 

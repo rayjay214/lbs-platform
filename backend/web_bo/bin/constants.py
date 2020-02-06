@@ -11,18 +11,20 @@ class ErrCode(IntEnum):
     ErrNoPermission = 7
     ErrEntHasDevice = 8
     ErrEntHasChildren = 9
+    ErrTypeNotSupported = 10
 
 ErrMsg = {
-    0 : 'OK',
-    1 : 'data not found',
-    2 : 'lack parameter',
-    3 : 'pwd not match',
-    4 : 'token timeout',
-    5 : 'token invalid',
-    6 : 'mysql error',
-    7 : 'no permission',
-    8 : 'account still has devices',
-    9 : 'account still has children accounts'
+    0  : 'OK',
+    1  : 'data not found',
+    2  : 'lack parameter',
+    3  : 'pwd not match',
+    4  : 'token timeout',
+    5  : 'token invalid',
+    6  : 'mysql error',
+    7  : 'no permission',
+    8  : 'account still has devices',
+    9  : 'account still has children accounts',
+    10 : 'product type not supported'
 }
 
 RedisKeyPrefix = {

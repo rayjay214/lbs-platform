@@ -143,6 +143,13 @@ def getCmdListByType():
     data = cmd_list
     return errcode, data
 
+def get_protocol_by_type(self, product_type):
+    for key in g_cfg['protocol']:
+        types = g_cfg['protocol'][key].split(',')
+        if product_type in types:
+            return key
+    return None
+
 @route('/device/sendCmd')
 def sendCmd():
     errcode, data = ErrCode.ErrOK, {}
@@ -168,6 +175,10 @@ def sendCmd():
     #write to kafka for cmd_handler module
     redis_op = RedisOp(g_cfg['redis'])
     dev_info = redis_op.getDeviceInfoById(dev_id)
+    protocol = get_protocol_by_type(dev_info['product_type'])
+    if protocol is None:
+        errcode = ErrCode.ErrTypeNotSupported
+        return errcode, data
     down_devmsg = DownDevMsg()
     down_devmsg.msgtype = MsgType.kCommandReq
     down_devmsg.cmdreq.id = int(dev_id)
@@ -175,6 +186,7 @@ def sendCmd():
     down_devmsg.cmdreq.seq = id
     down_devmsg.cmdreq.reqtime = arrow.now().timestamp
     down_devmsg.cmdreq.content = cmd_content
+    down_devmsg.cmdreq.protocol = protocol
     str = down_devmsg.SerializeToString()
     kafka_op = KafkaOp(g_cfg['kafka'])
     kafka_op.produce_cmd(str)

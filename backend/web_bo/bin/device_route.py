@@ -149,7 +149,7 @@ def getCmdListByType():
     data = cmd_list
     return errcode, data
 
-def get_protocol_by_type(self, product_type):
+def get_protocol_by_type(product_type):
     for key in g_cfg['protocol']:
         types = g_cfg['protocol'][key].split(',')
         if product_type in types:

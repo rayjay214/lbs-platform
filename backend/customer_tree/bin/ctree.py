@@ -27,12 +27,12 @@ class CustomerTree():
                 # some interface about dev_ids need to be paged, so it has to be ordered
                 self.root = AnyNode(login_name=ent['login_name'], id=ent['eid'],phone=ent['phone'],
                                     addr=ent['addr'], email=ent['email'], dev_ids=SortedSet(), total_dev_num=0,
-                                    permission=ent['permission'], parent=None)
+                                    permission=ent['permission'], logo_url=ent['logo_url'], parent=None)
                 continue
             myparent = search.find_by_attr(self.root, name='id', value=ent['pid'])
             node = AnyNode(login_name=ent['login_name'], id=ent['eid'],phone=ent['phone'],
                            addr=ent['addr'], email=ent['email'], dev_ids=SortedSet(), total_dev_num=0,
-                           permission=ent['permission'], parent=myparent)
+                           permission=ent['permission'], logo_url=ent['logo_url'], parent=myparent)
         device_gen = self.data_source.load_all_device()
         cache_node = {}
         for device in device_gen:
@@ -71,7 +71,7 @@ class CustomerTree():
                 return
             node = AnyNode(login_name=event['login_name'], id=event['eid'], phone=event['phone'],
                 addr=event['addr'], email=event['email'], dev_ids=set(), total_dev_num=0,
-                permission=event['permission'], parent=parent)
+                permission=event['permission'], logo_url=ent['logo_url'], parent=parent)
 
         self.dump_tree()
 
@@ -117,6 +117,9 @@ class CustomerTree():
                 if key.lower() == 'old_permission':
                     orig_key = key[4:]
                     node.permission = event[orig_key]
+                if key.lower() == 'old_logo_url':
+                    orig_key = key[4:]
+                    node.logo_url = event[orig_key]
         self.dump_tree()
 
 

@@ -134,6 +134,10 @@ def enterprise_login():
     response.set_cookie('access_token', access_token, path='/', expires=arrow.now().timestamp + 86400, max_age=86400)
     #response.status = 302
 
+    #get logo
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    customer = ctree_op.getCustomerInfoByLName(login_name)
+    data['logo_url'] = customer.logo_url
     if eid == 8888:
         data['url'] = '/home/yjcenter'
     else:

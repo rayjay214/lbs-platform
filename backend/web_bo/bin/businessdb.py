@@ -18,7 +18,8 @@ class BusinessDb(BaseDb):
 
     def get_ent_by_eid(self, eid) -> tuple:
         self.check()
-        sql = '''select eid,pid,phone,login_name,pwd,addr,email,permission from t_enterprise where eid={}'''.format(eid)
+        sql = '''select eid,pid,phone,login_name,pwd,addr,email,permission,logo_url 
+            from t_enterprise where eid={}'''.format(eid)
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
@@ -32,7 +33,8 @@ class BusinessDb(BaseDb):
                     'pwd' : row[4],
                     'addr' : row[5],
                     'email' : row[6],
-                    'permission' : row[7]
+                    'permission' : row[7],
+                    'logo_url' : row[8]
                 }
                 return ErrCode.ErrOK, ent
         except Exception as e:
@@ -69,8 +71,10 @@ class BusinessDb(BaseDb):
 
     def update_ent(self, ent: dict):
         self.check()
-        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}', permission='{}' where eid={};
-              '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'], ent['permission'], ent['eid'])
+        sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}', permission='{}', logo_url='{}'
+                 where eid={};
+              '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'],
+                    ent['permission'], ent['logo_url'], ent['eid'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)

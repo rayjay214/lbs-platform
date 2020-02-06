@@ -155,6 +155,7 @@ def updateEnt():
     ent['addr'] = addr if addr is not None else ent['addr']
     ent['email'] = email if email is not None else ent['email']
     ent['permission'] = permission if permission is not None else ent['permission']
+    ent['logo_url'] = ent['logo_url']
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_ent(ent)
     return errcode, data
@@ -251,3 +252,30 @@ def getRunInfoByEid():
 
     data = dealt_run_infos
     return errcode, data
+
+@route('/ent/uploadLogo')
+def uploadLogo():
+    errcode, data = ErrCode.ErrOK, {}
+    login_id = request.params.get('LOGIN_ID', None)
+    if login_id != 10000:
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    eid = request.params.get('eid', None)
+    file_logo = request.files.get('file_logo', None)
+    file_name = request.params('file_name', None)
+    if None in (eid, file_logo, file_name):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    base_path = g_cfg['master']['logo_dir']
+    file_path = base_path + eid + '_' + file_name
+    file_logo.save(file_path)
+    #logo_url save to db
+    logo_url = g_cfg['master']['host_url'] + g_cfg['master']['logo_save_path'] + file_name
+    db_r = BusinessDb(g_cfg['db_business_r'])
+    errcode, ent = db_r.get_ent_by_eid(eid)
+    if errcode != ErrCode.ErrOK:
+        data['msg'] = ErrMsg[errcode]
+        return errcode, data
+    ent['logo_url'] = logo_url
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.update_ent(ent)

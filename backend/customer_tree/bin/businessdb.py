@@ -8,7 +8,8 @@ class BusinessDb(BaseDb):
 
     def load_all_ent(self):
         self.check()
-        sql = '''select eid,pid,login_name,phone,addr,email,permission from t_enterprise order by eid'''
+        sql = '''select eid,pid,login_name,phone,addr,email,permission,logo_url 
+            from t_enterprise order by eid'''
         with self.conn.cursor() as cursor:
             cursor.execute(sql)
             g_logger.info(cursor._executed)
@@ -25,7 +26,8 @@ class BusinessDb(BaseDb):
                         'phone' : row[3],
                         'addr' : row[4],
                         'email' : row[5],
-                        'permission' : row[6]
+                        'permission' : row[6],
+                        'logo_url' : row[7]
                     }
                     yield ent
                 if len(rows) < max_fetch:

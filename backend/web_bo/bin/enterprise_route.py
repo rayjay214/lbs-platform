@@ -179,8 +179,8 @@ def getSubDeviceInfo():
 @route('/ent/searchEntByLName')
 def searchEntByLName(): #todo, support vague query
     errcode, data = ErrCode.ErrOK, {}
-    login_name = request.params.get('login_name', None)
-    if login_name is None:
+    login_name = request.params.login_name
+    if login_name is None or login_name == '':
         errcode = ErrCode.ErrLackParam
         return errcode, data
     ctree_op = CtreeOp(g_cfg['ctree'])

@@ -63,6 +63,12 @@ def searchDeviceByImei():
                 'text': '''{}({}/{})'''.format(node.login_name, node.own_dev_num, node.total_dev_num),
                 'addr': node.addr, 'phone': node.phone, 'email': node.email}
         ancestors.append(info)
+    # add owner info
+    owner = ctree_op.getCustomerInfoByEid(int(dev_info['eid']))
+    info = {'eid': owner.eid,
+            'text': '''{}({}/{})'''.format(owner.login_name, owner.own_dev_num, owner.total_dev_num),
+            'addr': owner.addr, 'phone': owner.phone, 'email': owner.email}
+    ancestors.append(info)
     data['ancestors'] = ancestors
     channel.close()
     return errcode, data
@@ -167,7 +173,7 @@ def sendCmd():
     #insert t_cmd_history
     cmd_info = {'dev_id':dev_id, 'cmd_id':cmd_id, 'cmd_name':cmd_name,
             'cmd_content':cmd_content, 'eid':login_id}
-    db_w = BusinessDb(g_cfg['db_business_r'])
+    db_w = BusinessDb(g_cfg['db_business_w'])
     errcode, id = db_w.insert_cmd_history(cmd_info)
     if errcode != ErrCode.ErrOK:
         return errcode, data

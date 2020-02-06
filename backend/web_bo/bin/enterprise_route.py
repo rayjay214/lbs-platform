@@ -279,3 +279,4 @@ def uploadLogo():
     ent['logo_url'] = logo_url
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_ent(ent)
+    return errcode, data

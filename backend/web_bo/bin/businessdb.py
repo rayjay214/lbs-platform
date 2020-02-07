@@ -86,7 +86,7 @@ class BusinessDb(BaseDb):
             g_logger.error(e)
             return ErrCode.ErrMysqlError
 
-    def imoort_devices(self, rows: list):
+    def import_devices(self, rows: list):
         self.check()
         sql = 'insert into t_device (imei, dev_name, eid, product_type) values (%s, %s, %s, %s)'
         try:
@@ -144,6 +144,19 @@ class BusinessDb(BaseDb):
                 self.conn.commit()
                 id = cursor.lastrowid
                 return ErrCode.ErrOK, id
+        except Exception as e:
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError, 0
+
+    def get_cmd_rsp_by_id(self, id):
+        self.check()
+        sql = '''select terminal_response from t_cmd_history where id={}'''.format(id)
+        try:
+            with self.coon.cursor() as cursor:
+                cursor.execute(sql)
+                g_logger.debug(cursor._executed)
+                row = cursor.fetchone()
+                return ErrCode.ErrOK, row[0]
         except Exception as e:
             g_logger.error(e)
             return ErrCode.ErrMysqlError, 0

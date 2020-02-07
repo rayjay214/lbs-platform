@@ -32,7 +32,7 @@ def importDevices():
         insert_data = (str(row), 'YJ-' + str(row)[-5:], int(target_eid), str(product_type))
         insert_rows.append(insert_data)
     db_w = BusinessDb(g_cfg['db_business_w'])
-    errcode = db_w.imoort_devices(insert_rows)
+    errcode = db_w.import_devices(insert_rows)
     return errcode, data
 
 
@@ -196,4 +196,21 @@ def sendCmd():
     str = down_devmsg.SerializeToString()
     kafka_op = KafkaOp(g_cfg['kafka'])
     kafka_op.produce_cmd(str)
+    return errcode, data
+
+@route('/device/getCmdRsp')
+def getCmdRsp():
+    errcode, data = ErrCode.ErrOK, {}
+    id = request.params.get('id', None)
+    if id is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    db_r = BusinessDb(g_cfg['db_business_r'])
+    errcode, response = db_r.get_cmd_rsp_by_id(id)
+    if errcode != ErrCode.ErrOK:
+        return errcode, data
+    if response is None or response == '':
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    data['response'] = response
     return errcode, data

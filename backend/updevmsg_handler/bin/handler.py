@@ -48,16 +48,16 @@ message AlarmMsg
 
 class Handler(object):
     def __init__(self):
-        self.db_mysql = BusinessDb(g_cfg['mysql'])
+        self.db_mysql = BusinessDb(g_cfg['db_business_w'])
 
     def proc_cmdresp(self, updev_msg):
-        errcode, id = self.db_mysql.get_seqno_by_devid(updev_msg.id)
+        errcode, id = self.db_mysql.get_seqno_by_devid(updev_msg.cmdrsp.id)
         if errcode != 0:
-            g_logger.error('get cmd_history id failed, dev_id:{}'.format(updev_msg.id))
+            g_logger.error('get cmd_history id failed, dev_id:{}'.format(updev_msg.cmdrsp.id))
             return
         errcode = self.db_mysql.update_cmd_history(updev_msg, id)
         if errcode != 0:
-            g_logger.error('update cmd_history failed, dev_id:{}'.format(updev_msg.id))
+            g_logger.error('update cmd_history failed, dev_id:{}'.format(updev_msg.cmdrsp.id))
 
     def proc_alarm(self, updev_msg):
         pass

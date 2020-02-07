@@ -9,7 +9,7 @@ class BusinessDb(BaseDb):
 
     def get_seqno_by_devid(self, dev_id):
         self.check()
-        sql = '''select id from t_cmd_history where dev_id={} and status='0' order by create_time desc'''
+        sql = '''select id from t_cmd_history where dev_id={} and status='0' order by create_time desc'''.format(dev_id)
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
@@ -22,12 +22,14 @@ class BusinessDb(BaseDb):
 
     def update_cmd_history(self, updev_msg, id):
         self.check()
-        resp_time = arrow.get(updev_msg.rsptime).format('YYYY-MM-DD HH:mm:ss')
-        sql = '''update t_cmd_history set status='1', terminal_response='{}', response_time='{}' 
-                where id={}'''.format(updev_msg.rsp, resp_time, id)
+        resp_time = arrow.get(updev_msg.cmdrsp.rsptime).format('YYYY-MM-DD HH:mm:ss')
+        sql = ''' update t_cmd_history set status='1', terminal_response='{}', response_time='{}'
+                  where id={}
+        '''.format(updev_msg.cmdrsp.rsp, resp_time, id)
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
+                self.conn.commit()
                 g_logger.info(cursor._executed)
                 return 0
         except Exception as e:

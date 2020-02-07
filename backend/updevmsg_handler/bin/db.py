@@ -7,8 +7,8 @@ from globals import g_logger, g_cfg
 
 class BaseDb(object):
     def __init__(self, dbcfg):
-        self.host = g_cfg['MYSQL']['host']
-        self.port = int(g_cfg['MYSQL']['port'])
+        self.host = g_cfg['mysql']['host']
+        self.port = int(g_cfg['mysql']['port'])
         self.user = dbcfg['user']
         self.passwd = dbcfg['passwd']
         self.db = dbcfg['db']

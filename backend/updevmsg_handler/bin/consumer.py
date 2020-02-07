@@ -3,10 +3,11 @@ from confluent_kafka import Consumer
 from globals import g_logger, g_cfg
 from dev_pb2 import MsgType, UpDevMsg
 from handler import Handler
+import traceback
 
 #todo use process
 class UpDevMsgConsumer(threading.Thread):
-    def __init__(self, handler):
+    def __init__(self):
         threading.Thread.__init__(self)
         self.consumer = Consumer({
             'bootstrap.servers': g_cfg['kafka']['broker'],
@@ -32,7 +33,7 @@ class UpDevMsgConsumer(threading.Thread):
         handle(updev_msg)
 
     def run(self):
-        self.consumer.subscribe(g_cfg['KAFKA']['topic'].split(','))
+        self.consumer.subscribe(g_cfg['kafka']['topic'].split(','))
         while True:
             try:
                 msg = self.consumer.poll(1)
@@ -44,6 +45,7 @@ class UpDevMsgConsumer(threading.Thread):
 
                 self.process_msg(msg.value())
             except Exception as e:
+                g_logger.error(traceback.format_exc())
                 g_logger.error(e)
 
         self.consumer.close()

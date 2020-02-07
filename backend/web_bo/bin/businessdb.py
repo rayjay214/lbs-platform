@@ -18,7 +18,7 @@ class BusinessDb(BaseDb):
 
     def get_ent_by_eid(self, eid) -> tuple:
         self.check()
-        sql = '''select eid,pid,phone,login_name,pwd,addr,email,permission,logo_url 
+        sql = '''select eid,pid,phone,login_name,pwd,addr,email,permission,logo_url
             from t_enterprise where eid={}'''.format(eid)
         try:
             with self.conn.cursor() as cursor:
@@ -152,10 +152,12 @@ class BusinessDb(BaseDb):
         self.check()
         sql = '''select terminal_response from t_cmd_history where id={}'''.format(id)
         try:
-            with self.coon.cursor() as cursor:
+            with self.conn.cursor() as cursor:
                 cursor.execute(sql)
                 g_logger.debug(cursor._executed)
                 row = cursor.fetchone()
+                if row is None:
+                    return ErrCode.ErrDataNotFound, 0
                 return ErrCode.ErrOK, row[0]
         except Exception as e:
             g_logger.error(e)

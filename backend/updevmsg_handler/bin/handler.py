@@ -2,6 +2,7 @@ from globals import g_logger, g_cfg
 from dev_pb2 import MsgType, UpDevMsg
 from businessdb import BusinessDb
 from redis_op import RedisOp
+from cassandra import CassandraOp
 
 '''
 message UpDevMsg
@@ -61,7 +62,10 @@ class Handler(object):
             g_logger.error('update cmd_history failed, dev_id:{}'.format(updev_msg.cmdrsp.id))
 
     def proc_alarm(self, updev_msg):
-        pass
+        cassandra_op = CassandraOp()
+        errcode = cassandra_op.insert_alarm(updev_msg.alarm)
+        if errcode != 0:
+            g_logger.error('{} insert alarm failed'.format(updev_msg.alarm.id))
 
     def proc_iccid(self, updev_msg):
         redis_op = RedisOp(g_cfg['redis'])

@@ -1,6 +1,7 @@
 from globals import g_logger, g_cfg
 from dev_pb2 import MsgType, UpDevMsg
 from businessdb import BusinessDb
+from redis_op import RedisOp
 
 '''
 message UpDevMsg
@@ -63,7 +64,27 @@ class Handler(object):
         pass
 
     def proc_iccid(self, updev_msg):
-        pass
+        redis_op = RedisOp(g_cfg['redis'])
+        dev_info = redis_op.getDeviceInfoById(updev_msg.iccid.id)
+        if dev_info is None:
+            g_logger.error('dev into not found, dev_id:{}'.format(updev_msg.iccid.id))
+        if dev_info['iccid'] == updev_msg.iccid.iccid:
+            g_logger.debug('iccid:{} is same'.format(dev_info['iccid']))
+            return
+        elif dev_info['iccid'] == '':
+            #update t_device
+            #insert t_card
+            errcode = self.db_mysql.update_device_iccid(updev_msg)
+            if errcode != 0:
+                g_logger.error('update iccid failed')
+        elif dev_info['iccid'] != updev_msg.iccid.iccid:   #change card
+            #update t_device
+            #insert t_card
+            errcode = self.db_mysql.update_device_iccid(updev_msg)
+            if errcode != 0:
+                g_logger.error('update iccid failed')
+            #other
+
 
 
 

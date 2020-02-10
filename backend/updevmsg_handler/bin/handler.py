@@ -2,7 +2,7 @@ from globals import g_logger, g_cfg
 from dev_pb2 import MsgType, UpDevMsg
 from businessdb import BusinessDb
 from redis_op import RedisOp
-from cassandra import CassandraOp
+from cassandra_op import CassandraOp
 
 '''
 message UpDevMsg

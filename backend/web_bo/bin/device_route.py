@@ -198,6 +198,51 @@ def sendCmd():
     kafka_op.produce_cmd(str)
     return errcode, data
 
+@route('/device/sendBmsRelayCmd')
+def sendBmsRelayCmd():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    cmd_id = 100
+    cmd_name = 'BMS断油电'  #has to be this way, refer to https://segmentfault.com/q/1010000008386616
+    cmd_content = request.params.get('cmd_content', None)
+    if None in (dev_id, cmd_id, cmd_content):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    #insert t_cmd_history
+    cmd_info = {'dev_id':dev_id, 'cmd_id':cmd_id, 'cmd_name':cmd_name,
+            'cmd_content':cmd_content, 'eid':login_id}
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode, id = db_w.insert_cmd_history(cmd_info)
+    if errcode != ErrCode.ErrOK:
+        return errcode, data
+    data['id'] = id
+    redis_op = RedisOp(g_cfg['redis'])
+    #REALY,0, only modify status in redis, no need to send cmd
+    flag = cmd_content[-2:-1]
+    if flag not in ('0', '1'):
+        errcode = ErrCode.ErrParamInvalid
+        return errcode, data
+    redis_op.setBmsRelayStatus(dev_id, flag)
+    #write to kafka for cmd_handler module
+    dev_info = redis_op.getDeviceInfoById(dev_id)
+    protocol = get_protocol_by_type(dev_info['product_type'])
+    if protocol is None:
+        errcode = ErrCode.ErrTypeNotSupported
+        return errcode, data
+    down_devmsg = DownDevMsg()
+    down_devmsg.msgtype = MsgType.kCommandReq
+    down_devmsg.cmdreq.id = int(dev_id)
+    down_devmsg.cmdreq.imei = dev_info['imei']
+    down_devmsg.cmdreq.seq = id
+    down_devmsg.cmdreq.reqtime = arrow.now().timestamp
+    down_devmsg.cmdreq.content = cmd_content
+    down_devmsg.cmdreq.protocol = protocol
+    str = down_devmsg.SerializeToString()
+    kafka_op = KafkaOp(g_cfg['kafka'])
+    kafka_op.produce_cmd(str)
+    return errcode, data
+
 @route('/device/getCmdRsp')
 def getCmdRsp():
     errcode, data = ErrCode.ErrOK, {}

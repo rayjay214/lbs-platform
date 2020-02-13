@@ -36,3 +36,5 @@ class RedisOp():
         filtered_run_infos = [i for i in run_infos if len(i) > 0]
         return filtered_run_infos
 
+    def setBmsRelayStatus(self, dev_id, flag):
+        self.redis.hset('bms:{}'.format(dev_id), 'relay_status', flag)

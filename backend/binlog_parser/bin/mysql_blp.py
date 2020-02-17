@@ -95,6 +95,7 @@ if __name__ == "__main__":
         't_device' : g_cfg['KAFKA']['t_device'],
         't_enterprise' : g_cfg['KAFKA']['t_enterprise'],
         't_fenceinfo' : g_cfg['KAFKA']['t_fenceinfo'],
+        't_card' : g_cfg['KAFKA']['t_card'],
         'broker' : g_cfg['KAFKA']['broker']
     }
     queue = queue.Queue()

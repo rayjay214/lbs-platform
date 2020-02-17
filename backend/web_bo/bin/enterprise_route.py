@@ -10,6 +10,7 @@ from businessdb import BusinessDb
 import traceback
 from customer_tree_pb2 import CustomerInfo
 import itertools
+import csv
 from ctree_op import CtreeOp
 from redis_op import RedisOp
 from businessdb import BusinessDb
@@ -280,3 +281,37 @@ def uploadLogo():
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_ent(ent)
     return errcode, data
+
+@route('ent/updateCardByFile')
+def updateCardByFile():
+    errcode, data = ErrCode.ErrOK, {}
+    login_id = request.params.get('LOGIN_ID', None)
+    if login_id != 10000:
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    file = request.files.get('card.csv', None)
+    if file is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    with open(file) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_no = 0
+        for row in csv_reader:
+            if line_no != 0:
+                data = row.split(',')
+                card = {'iccid' : data[0],
+                        'msisdn' : data[1],
+                        'manufacturer' : data[2],
+                        'package' : data[3],
+                        'plat_expire_time' : data[4]
+                }
+                errcode = db_w.update_card_info(card)
+                if errcode != ErrCode.ErrOK:
+                    g_logger.error('{} process failed, errcode:{}'.format(line_no, errcode))
+            line_no += 1
+        g_logger.info('{} lines processed'.format(line_no))
+
+
+
+

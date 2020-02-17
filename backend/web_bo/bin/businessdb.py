@@ -3,6 +3,7 @@ from db import BaseDb
 from globals import g_logger, g_cfg
 from constants import ErrCode
 
+
 class BusinessDb(BaseDb):
     def __init__(self, dbcfg):
         super(BusinessDb, self).__init__(dbcfg)
@@ -26,15 +27,15 @@ class BusinessDb(BaseDb):
                 g_logger.debug(cursor._executed)
                 row = cursor.fetchone()
                 ent = {
-                    'eid' : row[0],
-                    'pid' : row[1],
-                    'phone' : row[2],
-                    'login_name' : row[3],
-                    'pwd' : row[4],
-                    'addr' : row[5],
-                    'email' : row[6],
-                    'permission' : row[7],
-                    'logo_url' : row[8]
+                    'eid': row[0],
+                    'pid': row[1],
+                    'phone': row[2],
+                    'login_name': row[3],
+                    'pwd': row[4],
+                    'addr': row[5],
+                    'email': row[6],
+                    'permission': row[7],
+                    'logo_url': row[8]
                 }
                 return ErrCode.ErrOK, ent
         except Exception as e:
@@ -74,7 +75,7 @@ class BusinessDb(BaseDb):
         sql = '''update t_enterprise set pid={}, phone='{}', addr='{}', email='{}', permission='{}', logo_url='{}'
                  where eid={};
               '''.format(ent['pid'], ent['phone'], ent['addr'], ent['email'],
-                    ent['permission'], ent['logo_url'], ent['eid'])
+                         ent['permission'], ent['logo_url'], ent['eid'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
@@ -136,7 +137,8 @@ class BusinessDb(BaseDb):
         self.check()
         sql = '''insert into t_cmd_history(dev_id, eid, cmd_name, cmd_content, cmd_id)
             values ({}, {}, '{}', '{}', {})
-        '''.format(cmd_info['dev_id'], cmd_info['eid'], cmd_info['cmd_name'], cmd_info['cmd_content'], cmd_info['cmd_id'])
+        '''.format(cmd_info['dev_id'], cmd_info['eid'], cmd_info['cmd_name'], cmd_info['cmd_content'],
+                   cmd_info['cmd_id'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)
@@ -162,3 +164,17 @@ class BusinessDb(BaseDb):
         except Exception as e:
             g_logger.error(e)
             return ErrCode.ErrMysqlError, 0
+
+    def update_card_info(self, card):
+        self.check()
+        sql = '''update t_card set msisdn='{}', manufacturer='{}', package='{}', plat_expire_time='{}'
+          where iccid='{}' '''.format(card['msisdn'], card['manufacturer'], card['pakcage'], card['plat_expire_time'], card['iccid'])
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(sql)
+                g_logger.debug(cursor._executed)
+                self.conn.commit()
+                return ErrCode.ErrOK
+        except Exception as e:
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError

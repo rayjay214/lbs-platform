@@ -168,7 +168,7 @@ class BusinessDb(BaseDb):
     def update_card_info(self, card):
         self.check()
         sql = '''update t_card set msisdn='{}', manufacturer='{}', package='{}', plat_expire_time='{}'
-          where iccid='{}' '''.format(card['msisdn'], card['manufacturer'], card['pakcage'], card['plat_expire_time'], card['iccid'])
+          where iccid='{}' '''.format(card['msisdn'], card['manufacturer'], card['package'], card['plat_expire_time'], card['iccid'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)

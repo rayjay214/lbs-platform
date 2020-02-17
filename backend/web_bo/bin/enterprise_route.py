@@ -258,7 +258,7 @@ def getRunInfoByEid():
 def uploadLogo():
     errcode, data = ErrCode.ErrOK, {}
     login_id = request.params.get('LOGIN_ID', None)
-    if login_id != 10000:
+    if int(login_id) != 10000:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     eid = request.params.get('eid', None)
@@ -286,7 +286,7 @@ def uploadLogo():
 def updateCardByFile():
     errcode, data = ErrCode.ErrOK, {}
     login_id = request.params.get('LOGIN_ID', None)
-    if login_id != 10000:
+    if int(login_id) != 10000:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
     file_upload = request.files.get('cardinfo', None)
@@ -294,7 +294,7 @@ def updateCardByFile():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     db_w = BusinessDb(g_cfg['db_business_w'])
-    workbook = xlrd.open_workbook(file_contents=file_upload.file.decode())
+    workbook = xlrd.open_workbook(file_contents=file_upload.file.read())
     sheet = workbook.sheet_by_index(0)
     rows = sheet.nrows
     for rowno in range(1, rows):
@@ -308,7 +308,6 @@ def updateCardByFile():
         errcode = db_w.update_card_info(card)
         if errcode != ErrCode.ErrOK:
             g_logger.error('{} process failed, errcode:{}'.format(rowno, errcode))
-        g_logger.info('{} lines processed'.format(rows)
 
-
-
+    g_logger.info('{} lines processed'.format(rows))
+    return errcode, data

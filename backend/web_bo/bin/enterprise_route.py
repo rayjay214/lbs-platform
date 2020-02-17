@@ -10,11 +10,11 @@ from businessdb import BusinessDb
 import traceback
 from customer_tree_pb2 import CustomerInfo
 import itertools
-import csv
 from ctree_op import CtreeOp
 from redis_op import RedisOp
 from businessdb import BusinessDb
 from kafka_op import KafkaOp
+import xlrd
 
 ctree_op = CtreeOp(g_cfg['ctree'])
 redis_op = RedisOp(g_cfg['redis'])
@@ -254,7 +254,7 @@ def getRunInfoByEid():
     data = dealt_run_infos
     return errcode, data
 
-@route('/ent/uploadLogo')
+@route('/ent/uploadLogo', method=['GET', 'POST'])
 def uploadLogo():
     errcode, data = ErrCode.ErrOK, {}
     login_id = request.params.get('LOGIN_ID', None)
@@ -282,36 +282,33 @@ def uploadLogo():
     errcode = db_w.update_ent(ent)
     return errcode, data
 
-@route('ent/updateCardByFile')
+@route('/ent/updateCardByFile', method=['GET', 'POST'])
 def updateCardByFile():
     errcode, data = ErrCode.ErrOK, {}
     login_id = request.params.get('LOGIN_ID', None)
     if login_id != 10000:
         errcode = ErrCode.ErrNoPermission
         return errcode, data
-    file = request.files.get('card.csv', None)
-    if file is None:
+    file_upload = request.files.get('cardinfo', None)
+    if file_upload is None:
         errcode = ErrCode.ErrLackParam
         return errcode, data
     db_w = BusinessDb(g_cfg['db_business_w'])
-    with open(file) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_no = 0
-        for row in csv_reader:
-            if line_no != 0:
-                data = row.split(',')
-                card = {'iccid' : data[0],
-                        'msisdn' : data[1],
-                        'manufacturer' : data[2],
-                        'package' : data[3],
-                        'plat_expire_time' : data[4]
-                }
-                errcode = db_w.update_card_info(card)
-                if errcode != ErrCode.ErrOK:
-                    g_logger.error('{} process failed, errcode:{}'.format(line_no, errcode))
-            line_no += 1
-        g_logger.info('{} lines processed'.format(line_no))
-
+    workbook = xlrd.open_workbook(file_contents=file_upload.file.decode())
+    sheet = workbook.sheet_by_index(0)
+    rows = sheet.nrows
+    for rowno in range(1, rows):
+        row = sheet.row_values(rowno)
+        card = {'iccid' : row[0],
+                'msisdn' : row[1],
+                'manufacturer' : row[2],
+                'package' : row[3],
+                'plat_expire_time' : row[4]
+        }
+        errcode = db_w.update_card_info(card)
+        if errcode != ErrCode.ErrOK:
+            g_logger.error('{} process failed, errcode:{}'.format(rowno, errcode))
+        g_logger.info('{} lines processed'.format(rows)
 
 
 

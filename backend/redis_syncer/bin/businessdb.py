@@ -47,8 +47,8 @@ class BusinessDb(BaseDb):
                         'msisdn' : row[1],
                         'package' : row[2],
                         'manufacturer' : row[3],
-                        'create_time' : row[4],
-                        'plat_expire_time' : row[5],
+                        'create_time' : '' if row[4] is None else row[4].strftime("%Y-%m-%d %H:%M:%S"),
+                        'plat_expire_time' : '' if row[5] is None else row[5].strftime("%Y-%m-%d %H:%M:%S"),
                     }
                     yield card
                 if len(rows) < 100:

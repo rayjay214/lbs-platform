@@ -39,7 +39,7 @@ class RedisSyncer(threading.Thread):
 
     def set_card2redis(self, card):
         card_key = 'card:{}'.format(card['iccid'])
-        self.pipe.hmget(card_key, card)
+        self.pipe.hmset(card_key, card)
         self.commit()
 
     def del_card_from_redis(self, card):

@@ -37,10 +37,23 @@ class RedisSyncer(threading.Thread):
             self.pipe.delete(imei_key)
             self.commit()
 
+    def set_card2redis(self, card):
+        card_key = 'card:{}'.format(card['iccid'])
+        self.pipe.hmget(card_key, card)
+        self.commit()
+
+    def del_card_from_redis(self, card):
+        card_key = 'card:{}'.format(card['iccid'])
+        self.pipe.delete(card_key)
+        self.commit()
+
     def init_fromdb(self):
         device_gen = self.data_source.load_all_device()
         for device in device_gen:
             self.set_device2redis(device)
+        card_gen = self.data_source.load_all_cards()
+        for card in card_gen:
+            self.set_card2redis(card)
 
     def commit(self):
         if len(self.pipe.command_stack) > int(g_cfg['REDIS']['maxbuffered_cmds']):
@@ -59,4 +72,17 @@ class RedisSyncer(threading.Thread):
     def delete_device(self, event):
         device = {k:v for k,v in event.items() if k not in to_del_keys_in_events}
         self.del_device_from_redis(device)
+
+    def insert_card(self, event):
+        card = {k:v for k,v in event.items() if k not in to_del_keys_in_events}
+        self.set_card2redis(card)
+
+    def update_card(self, event):
+        card = {k:v for k,v in event.items() if k not in to_del_keys_in_events and not k.startswith('old_')}
+        self.set_card2redis(card)
+
+    def delete_card(self, event):
+        card = {k:v for k,v in event.items() if k not in to_del_keys_in_events}
+        self.del_card_from_redis(card)
+
 

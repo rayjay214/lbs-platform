@@ -16,12 +16,15 @@ class KafkaConsumer(threading.Thread):
         return {
             'insert' : {
                 't_device' : self.redis_syncer.insert_device,
+                't_card' : self.redis_syncer.insert_card,
             },
             'update' : {
                 't_device' : self.redis_syncer.update_device,
+                't_card' : self.redis_syncer.update_card,
             },
             'delete' : {
                 't_device' : self.redis_syncer.delete_device,
+                't_card' : self.redis_syncer.delete_card,
             }
         }.get(action, {}).get(table)
 

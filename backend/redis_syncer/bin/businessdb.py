@@ -30,3 +30,26 @@ class BusinessDb(BaseDb):
                     yield device
                 if len(rows) < 100:
                     break
+
+    def load_all_cards(self):
+        self.check()
+        sql = '''select iccid,msisdn,package,manufacturer,create_time,plat_expire_time from t_card order by iccid'''
+        with self.conn.cursor() as cursor:
+            cursor.execute(sql)
+            g_logger.info(cursor._executed)
+            while True:
+                rows = cursor.fetchmany(size=100)
+                if rows is None:
+                    break
+                for row in rows:
+                    card = {
+                        'iccid' : row[0],
+                        'msisdn' : row[1],
+                        'package' : row[2],
+                        'manufacturer' : row[3],
+                        'create_time' : row[4],
+                        'plat_expire_time' : row[5],
+                    }
+                    yield card
+                if len(rows) < 100:
+                    break

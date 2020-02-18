@@ -299,11 +299,12 @@ def updateCardByFile():
     rows = sheet.nrows
     for rowno in range(1, rows):
         row = sheet.row_values(rowno)
+        expire_time = arrow.get(row[4], 'YYYY/M/D').format('YYYY-MM-DD HH:mm:ss')
         card = {'iccid' : row[0],
                 'msisdn' : row[1],
                 'manufacturer' : row[2],
                 'package' : row[3],
-                'plat_expire_time' : row[4]
+                'plat_expire_time' : expire_time
         }
         errcode = db_w.update_card_info(card)
         if errcode != ErrCode.ErrOK:

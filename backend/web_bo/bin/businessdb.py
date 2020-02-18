@@ -2,7 +2,7 @@ import MySQLdb
 from db import BaseDb
 from globals import g_logger, g_cfg
 from constants import ErrCode
-
+import arrow
 
 class BusinessDb(BaseDb):
     def __init__(self, dbcfg):
@@ -135,10 +135,11 @@ class BusinessDb(BaseDb):
 
     def insert_cmd_history(self, cmd_info: dict):
         self.check()
-        sql = '''insert into t_cmd_history(dev_id, eid, cmd_name, cmd_content, cmd_id)
-            values ({}, {}, '{}', '{}', {})
+        tm = arrow.now().format('YYYY-MM-DD HH:mm:ss')
+        sql = '''insert into t_cmd_history(dev_id, eid, cmd_name, cmd_content, cmd_id, create_time)
+            values ({}, {}, '{}', '{}', {}, '{}')
         '''.format(cmd_info['dev_id'], cmd_info['eid'], cmd_info['cmd_name'], cmd_info['cmd_content'],
-                   cmd_info['cmd_id'])
+                   cmd_info['cmd_id'], tm)
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)

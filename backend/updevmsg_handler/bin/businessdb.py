@@ -18,7 +18,7 @@ class BusinessDb(BaseDb):
                 return 0, row[0]
         except Exception as e:
             g_logger.error(e)
-            return -1,
+            return -1,0
 
     def update_cmd_history(self, updev_msg, id):
         self.check()

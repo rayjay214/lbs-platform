@@ -15,6 +15,7 @@ from redis_op import RedisOp
 from businessdb import BusinessDb
 from kafka_op import KafkaOp
 import xlrd
+import datetime
 
 ctree_op = CtreeOp(g_cfg['ctree'])
 redis_op = RedisOp(g_cfg['redis'])
@@ -299,7 +300,8 @@ def updateCardByFile():
     rows = sheet.nrows
     for rowno in range(1, rows):
         row = sheet.row_values(rowno)
-        expire_time = arrow.get(row[4], 'YYYY/M/D').format('YYYY-MM-DD HH:mm:ss')
+        datetime_row4 = datetime.datetime(*xlrd.xldate_as_tuple(row[4], workbook.datemode))
+        expire_time = arrow.get(datetime_row4).format('YYYY-MM-DD HH:mm:ss')
         card = {'iccid' : row[0],
                 'msisdn' : row[1],
                 'manufacturer' : row[2],

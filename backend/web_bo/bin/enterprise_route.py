@@ -43,6 +43,7 @@ def getEntInfoByEid():
     data['email'] = customer.email
     data['leaf'] = customer.is_leaf
     data['permission'] = customer.permission
+    data['logo_url'] = customer.logo_url
     return errcode, data
 
 @route('/ent/getEntChildrenByEid')
@@ -264,7 +265,7 @@ def uploadLogo():
         return errcode, data
     eid = request.params.get('eid', None)
     file_logo = request.files.get('file_logo', None)
-    file_name = request.params('file_name', None)
+    file_name = request.params.file_name if len(request.params.file_name) != 0 else None
     if None in (eid, file_logo, file_name):
         errcode = ErrCode.ErrLackParam
         return errcode, data
@@ -272,7 +273,7 @@ def uploadLogo():
     file_path = base_path + eid + '_' + file_name
     file_logo.save(file_path)
     #logo_url save to db
-    logo_url = g_cfg['master']['host_url'] + g_cfg['master']['logo_save_path'] + file_name
+    logo_url = g_cfg['master']['host_url'] + g_cfg['master']['logo_save_path'] + eid + '_' + file_name
     db_r = BusinessDb(g_cfg['db_business_r'])
     errcode, ent = db_r.get_ent_by_eid(eid)
     if errcode != ErrCode.ErrOK:

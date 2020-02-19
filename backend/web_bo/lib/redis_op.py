@@ -38,3 +38,7 @@ class RedisOp():
 
     def setBmsRelayStatus(self, dev_id, flag):
         self.redis.hset('bms:{}'.format(dev_id), 'relay_status', flag)
+
+    def getCardInfoByIccid(self, iccid):
+        card_info = self.redis.hgetall('card:{}'.format(iccid))
+        return card_info

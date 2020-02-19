@@ -179,3 +179,19 @@ class BusinessDb(BaseDb):
         except Exception as e:
             g_logger.error(e)
             return ErrCode.ErrMysqlError
+
+    def update_device(self, device: dict):
+        self.check()
+        sql = '''update t_device set dev_name='{}', product_type='{}'
+                 where dev_id={};
+              '''.format(device['dev_name'], device['product_type'], device['dev_id'])
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(sql)
+                g_logger.info(cursor._executed)
+                self.conn.commit()
+                return ErrCode.ErrOK
+        except Exception as e:
+            g_logger.error(sql)
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError

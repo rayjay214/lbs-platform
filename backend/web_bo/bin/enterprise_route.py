@@ -314,3 +314,18 @@ def updateCardByFile():
 
     g_logger.info('{} lines processed'.format(rows))
     return errcode, data
+
+@route('/ent/getCardInfoByIccid')
+def getCardInfoByIccid():
+    errcode, data = ErrCode.ErrOK, {}
+    #todo validate
+    iccid = request.params.get('iccid', None)
+    if iccid is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    redis_op = RedisOp(g_cfg['redis'])
+    card_info = redis_op.getCardInfoByIccid(iccid)
+    data['card'] = card_info
+    return ErrCode.ErrOK, data
+
+

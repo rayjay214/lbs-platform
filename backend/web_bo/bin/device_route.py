@@ -259,3 +259,20 @@ def getCmdRsp():
         return errcode, data
     data['response'] = response
     return errcode, data
+
+@route('/device/updateDevice')
+def updateDevice():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    product_type = request.params.get('product_type', None)
+    dev_name = request.params.dev_name if len(request.params.dev_name) != 0 else None
+    if dev_id is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_info = redis_op.getDeviceInfoById(dev_id)
+    dev_info['product_type'] = product_type if product_type is not None else dev_info['product_type']
+    dev_info['dev_name'] = dev_name if dev_name is not None else dev_info['dev_name']
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.update_device(dev_info)
+    return errcode, data

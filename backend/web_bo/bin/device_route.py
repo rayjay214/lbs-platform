@@ -100,9 +100,10 @@ def getRunInfoByDevid():
     #translate coord
     map_type = request.params.get('map_type', None)
     if map_type == 'baidu':
-        lon, lat = wgs84_to_bd09(float(run_info['longitude'])/100000, float(run_info['latitude'])/1000000)
+        lon, lat = wgs84_to_bd09(float(run_info['longitude'])/1000000, float(run_info['latitude'])/1000000)
         run_info['longitude'] = str(lon * 1000000)
         run_info['latitude'] = str(lat * 1000000)
+
     data = run_info
     #calc dev_status
     data['dev_status'] = 'online'

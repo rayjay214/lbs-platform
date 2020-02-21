@@ -16,6 +16,7 @@ from businessdb import BusinessDb
 from kafka_op import KafkaOp
 import xlrd
 import datetime
+from trans_coord import wgs84_to_bd09
 
 ctree_op = CtreeOp(g_cfg['ctree'])
 redis_op = RedisOp(g_cfg['redis'])
@@ -237,8 +238,14 @@ def getRunInfoByEid():
     if run_infos is None or len(run_infos) == 0 or len(run_infos[0]) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
+    map_type = request.params.get('map_type', None)
     dealt_run_infos = []
     for info in run_infos:
+        if map_type == 'baidu':
+            lon, lat = wgs84_to_bd09(float(info['longitude'])/1000000, float(info['latitude'])/1000000)
+            info['longitude'] = str(lon * 1000000)
+            info['latitude'] = str(lat * 1000000)
+
         info['dev_status'] = 'online'
         maxtime = max(int(info['gps_time']), int(info['sys_time']))
         now = arrow.now().timestamp

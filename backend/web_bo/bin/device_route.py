@@ -13,6 +13,8 @@ from ctree_op import CtreeOp
 from redis_op import RedisOp
 from businessdb import BusinessDb
 from kafka_op import KafkaOp
+from trans_coord import wgs84_to_bd09
+
 
 @route('/device/importDevices')
 def importDevices():
@@ -95,6 +97,12 @@ def getRunInfoByDevid():
     if run_info is None or len(run_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
+    #translate coord
+    map_type = request.params.get('map_type', None)
+    if map_type == 'baidu':
+        lon, lat = wgs84_to_bd09(float(run_info['longitude'])/100000, float(run_info['latitude'])/1000000)
+        run_info['longitude'] = str(lon * 1000000)
+        run_info['latitude'] = str(lat * 1000000)
     data = run_info
     #calc dev_status
     data['dev_status'] = 'online'
@@ -276,3 +284,14 @@ def updateDevice():
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_device(dev_info)
     return errcode, data
+
+@route('/device/getLocationInfo')
+def getLocationInfo():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    if None in (dev_id, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    limit = 1000

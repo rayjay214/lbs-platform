@@ -294,4 +294,15 @@ def getLocationInfo():
     if None in (dev_id, begin_tm, end_tm):
         errcode = ErrCode.ErrLackParam
         return errcode, data
-    limit = 1000
+    cassandra_op = CassandraOp()
+    gpsinfos = cassandra_op.getGpsInfoByTimeRange(dev_id, begin_tm, end_tm)
+    if gpsinfos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    last_info = gpsinfos[-1]
+    if end_tm > last_info['report_time']:
+        data['resEndTime'] = last_info['report_time']
+    data['infos'] = gpsinfos
+    return ErrCode.ErrOK, data
+
+

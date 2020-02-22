@@ -301,8 +301,7 @@ def getLocationInfo():
         errcode = ErrCode.ErrMysqlError
         return errcode, data
     last_info = gpsinfos[-1]
-    if end_tm > last_info['report_time']:
-        data['resEndTime'] = last_info['report_time']
+    data['resEndTime'] = last_info['report_time']
     data['infos'] = gpsinfos
     return ErrCode.ErrOK, data
 

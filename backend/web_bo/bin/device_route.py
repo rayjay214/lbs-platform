@@ -14,7 +14,7 @@ from redis_op import RedisOp
 from businessdb import BusinessDb
 from kafka_op import KafkaOp
 from trans_coord import wgs84_to_bd09
-
+from cassandra_op import CassandraOp
 
 @route('/device/importDevices')
 def importDevices():

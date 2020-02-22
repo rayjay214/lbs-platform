@@ -17,13 +17,13 @@ class CassandraOp():
             rows = self.session.execute(sql)
             for row in rows:
                 gpsinfo = {
-                    'dev_id' = row[0],
-                    'report_time' = arrow.get(row[1].timestamp),
-                    'direction' = row[2],
-                    'lat' = row[3],
-                    'lon' = row[4],
-                    'speed' = row[7],
-                    'sys_time' = arrow.get(row[8].timestamp)
+                    'dev_id' : row[0],
+                    'report_time' : arrow.get(row[1].timestamp),
+                    'direction' : row[2],
+                    'lat' : row[3],
+                    'lon' : row[4],
+                    'speed' : row[7],
+                    'sys_time' : arrow.get(row[8].timestamp)
                 }
                 gpsinfos.append(gpsinfo)
             return gpsinfos

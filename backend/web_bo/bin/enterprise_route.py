@@ -239,6 +239,7 @@ def getRunInfoByEid():
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     map_type = request.params.get('map_type', None)
+    map_type = 'baidu'
     dealt_run_infos = []
     for info in run_infos:
         if map_type == 'baidu':
@@ -274,11 +275,12 @@ def uploadLogo():
     file_logo = request.files.get('file_logo', None)
     file_name = request.params.file_name if len(request.params.file_name) != 0 else None
     if None in (eid, file_logo, file_name):
+        g_logger.info('{},{},{}'.format(eid, file_logo, file_name))
         errcode = ErrCode.ErrLackParam
         return errcode, data
     base_path = g_cfg['master']['logo_dir']
     file_path = base_path + eid + '_' + file_name
-    file_logo.save(file_path)
+    file_logo.save(file_path, overwrite=True)
     #logo_url save to db
     logo_url = g_cfg['master']['host_url'] + g_cfg['master']['logo_save_path'] + eid + '_' + file_name
     db_r = BusinessDb(g_cfg['db_business_r'])

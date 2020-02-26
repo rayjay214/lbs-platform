@@ -42,3 +42,7 @@ class RedisOp():
     def getCardInfoByIccid(self, iccid):
         card_info = self.redis.hgetall('card:{}'.format(iccid))
         return card_info
+
+    def getFenceInfoByDevId(self, dev_id):
+        fence_info = self.redis.hgetall('fence:{}'.format(dev_id))
+        return fence_info

@@ -305,4 +305,41 @@ def getLocationInfo():
     data['infos'] = gpsinfos
     return ErrCode.ErrOK, data
 
+'''
+http://litin.gmiot.net/1/tool/efence?method=getFenceInfo&user_id=179996&map_type=BAIDU
+http://litin.gmiot.net//1/tool/efence?method=saveFenceInfo&shape_type=1&school_id=1044034&user_id=179996&shape_param=22.543325,113.967297,400&validate_flag=1&map_type=BAIDU
+http://litin.gmiot.net//1/tool/efence?method=saveFenceInfo&shape_type=2&school_id=1044034&user_id=180012&
+shape_param=113.966261,22.543752;113.96547,22.541532;113.971184,22.54452;113.969531,22.54739;113.965003,22.547724;
+113.965057,22.547674;113.965057,22.547674;113.965057,22.547691&validate_flag=1&map_type=BAIDU
+'''
 
+@route('/device/saveFenceInfo')
+def saveFenceInfo():
+    errcode, data = ErrCode.ErrOK, {}
+    fence = {}
+    fence['dev_id'] = request.params.get('dev_id', None)
+    fence['validate_flag'] = request.params.get('validate_flag', None)
+    fence['shape_type'] = request.params.get('shape_type', None)
+    fence['shape_param'] = request.params.get('shape_param', None)
+    fence['alarm_type'] = '2'
+    if None in (fence['dev_id'], fence['validate_flag'], fence['shape_type'], fence['shape_param']):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    db_w = BusinessDb(g_cfg['db_business_w'])
+    errcode = db_w.update_fence(fence)
+    return errcode, data
+
+@route('/device/getFenceInfo')
+def getFenceInfo():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    if dev_id is None:
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    redis_op = RedisOp(g_cfg['redis'])
+    fence = redis_op.getFenceInfoByDevId(dev_id)
+    if fence is None:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    data['fence'] = fence
+    return errcode, data

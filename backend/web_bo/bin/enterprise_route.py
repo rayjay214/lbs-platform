@@ -143,7 +143,7 @@ def updateEnt():
     pid = request.params.get('pid', None)
     phone = request.params.get('phone', None)
     addr = request.params.addr if len(request.params.addr) != 0 else None
-    email  = request.params.get('email', None)
+    email = request.params.get('email', None)
     permission = request.params.get('permission', None)
     if eid is None:
         g_logger.warn('eid is none')

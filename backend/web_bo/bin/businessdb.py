@@ -195,3 +195,19 @@ class BusinessDb(BaseDb):
             g_logger.error(sql)
             g_logger.error(e)
             return ErrCode.ErrMysqlError
+
+    def update_fence(self, fence: dict):
+        self.check()
+        sql = ''' t_device set dev_name='{}', product_type='{}'
+                 where dev_id={};
+              '''.format(device['dev_name'], device['product_type'], device['dev_id'])
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(sql)
+                g_logger.info(cursor._executed)
+                self.conn.commit()
+                return ErrCode.ErrOK
+        except Exception as e:
+            g_logger.error(sql)
+            g_logger.error(e)
+            return ErrCode.ErrMysqlError

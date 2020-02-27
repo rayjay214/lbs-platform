@@ -198,9 +198,9 @@ class BusinessDb(BaseDb):
 
     def update_fence(self, fence: dict):
         self.check()
-        sql = ''' t_device set dev_name='{}', product_type='{}'
-                 where dev_id={};
-              '''.format(device['dev_name'], device['product_type'], device['dev_id'])
+        sql = ''' replace into t_fenceinfo(dev_id, validate_flag, shape_type, shape_param, alarm_type) values
+              ({}, '{}', '{}', '{}', '{}');
+              '''.format(fence['dev_id'], fence['validate_flag'], fence['shape_type'], fence['shape_param'], fence['alarm_type'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)

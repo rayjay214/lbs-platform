@@ -64,6 +64,9 @@ class RedisSyncer(threading.Thread):
         card_gen = self.data_source.load_all_cards()
         for card in card_gen:
             self.set_card2redis(card)
+        fence_gen = self.data_source.load_all_fences()
+        for fence in fence_gen:
+            self.set_fence2redis(fence)
 
     def commit(self):
         if len(self.pipe.command_stack) > int(g_cfg['REDIS']['maxbuffered_cmds']):

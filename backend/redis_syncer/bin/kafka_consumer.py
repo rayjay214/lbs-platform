@@ -22,12 +22,12 @@ class KafkaConsumer(threading.Thread):
             'update' : {
                 't_device' : self.redis_syncer.update_device,
                 't_card' : self.redis_syncer.update_card,
-                't_fence' : self.redis_syncer.update_fence,
+                't_fenceinfo' : self.redis_syncer.update_fence,
             },
             'delete' : {
                 't_device' : self.redis_syncer.delete_device,
                 't_card' : self.redis_syncer.delete_card,
-                't_fence' : self.redis_syncer.delete_fence,
+                't_fenceinfo' : self.redis_syncer.delete_fence,
             }
         }.get(action, {}).get(table)
 

@@ -53,3 +53,26 @@ class BusinessDb(BaseDb):
                     yield card
                 if len(rows) < 100:
                     break
+
+    def load_all_fences(self):
+        self.check()
+        sql = '''select fence_id,dev_id,fence_name,SHAPE_TYPE,SHAPE_PARAM,VALIDATE_FLAG from t_fenceinfo order by dev_id'''
+        with self.conn.cursor() as cursor:
+            cursor.execute(sql)
+            g_logger.info(cursor._executed)
+            while True:
+                rows = cursor.fetchmany(size=100)
+                if rows is None:
+                    break
+                for row in rows:
+                    fence = {
+                        'fence_id' : row[0],
+                        'dev_id' : row[1],
+                        'fence_name' : row[2],
+                        'SHAPE_TYPE' : row[3],
+                        'SHAPE_PARAM' : row[4],
+                        'VALIDATE_FLAG' : row[5],
+                    }
+                    yield fence
+                if len(rows) < 100:
+                    break

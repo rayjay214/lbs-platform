@@ -47,6 +47,16 @@ class RedisSyncer(threading.Thread):
         self.pipe.delete(card_key)
         self.commit()
 
+    def set_fence2redis(self, fence):
+        fence_key = 'fence:{}'.format(fence['dev_id'])
+        self.pipe.hmset(fence_key, fence)
+        self.commit()
+
+    def del_fence_from_redis(self, fence):
+        fence_key = 'fence:{}'.format(fence['dev_id'])
+        self.pipe.delete(fence_key)
+        self.commit()
+
     def init_fromdb(self):
         device_gen = self.data_source.load_all_device()
         for device in device_gen:
@@ -85,4 +95,14 @@ class RedisSyncer(threading.Thread):
         card = {k:v for k,v in event.items() if k not in to_del_keys_in_events}
         self.del_card_from_redis(card)
 
+    def insert_fence(self, event):
+        fence = {k:v for k,v in event.items() if k not in to_del_keys_in_events}
+        self.set_fence2redis(fence)
 
+    def update_fence(self, event):
+        fence = {k:v for k,v in event.items() if k not in to_del_keys_in_events and not k.startswith('old_')}
+        self.set_fence2redis(fence)
+
+    def delete_fence(self, event):
+        fence = {k:v for k,v in event.items() if k not in to_del_keys_in_events}
+        self.del_fence_from_redis(fence)

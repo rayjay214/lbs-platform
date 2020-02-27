@@ -71,7 +71,7 @@ class CustomerTree():
                 return
             node = AnyNode(login_name=event['login_name'], id=event['eid'], phone=event['phone'],
                 addr=event['addr'], email=event['email'], dev_ids=set(), total_dev_num=0,
-                permission=event['permission'], logo_url=ent['logo_url'], parent=parent)
+                permission=event['permission'], logo_url=event['logo_url'], parent=parent)
 
         self.dump_tree()
 

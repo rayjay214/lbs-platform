@@ -135,6 +135,7 @@ def enterprise_login():
     response.set_cookie('access_token', access_token, path='/', expires=arrow.now().timestamp + 86400, max_age=86400)
     #response.status = 302
     data['access_token'] = access_token
+    data['eid'] = eid
 
     #get logo
     ctree_op = CtreeOp(g_cfg['ctree'])

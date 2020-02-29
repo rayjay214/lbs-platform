@@ -240,13 +240,19 @@ def getRunInfoByEid():
         return errcode, data
     map_type = request.params.get('map_type', None)
     map_type = 'baidu'
+    #add dev_name
+    dev_infos = redis_op.getDeviceInfos(customer.dev_ids)
+    dict_devid_devname = {}
+    for info in dev_infos:
+        dict_devid_devname[info['dev_id']] = info['dev_name']
+
     dealt_run_infos = []
     for info in run_infos:
         if map_type == 'baidu':
             lon, lat = wgs84_to_bd09(float(info['longitude'])/1000000, float(info['latitude'])/1000000)
             info['longitude'] = str(lon * 1000000)
             info['latitude'] = str(lat * 1000000)
-
+        info['dev_name'] = dict_devid_devname[info['devid']]
         info['dev_status'] = 'online'
         maxtime = max(int(info['gps_time']), int(info['sys_time']))
         now = arrow.now().timestamp

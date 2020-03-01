@@ -37,6 +37,26 @@ def importDevices():
     errcode = db_w.import_devices(insert_rows)
     return errcode, data
 
+@route('/device/getDevInfoById')
+def getDevInfoById():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    if dev_id is None:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    redis_op = RedisOp(g_cfg['redis'])
+    dev_info = redis_op.getDeviceInfoById(dev_id)
+    if dev_info is None or len(dev_info) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+    if not is_ancestor and int(login_id) != int(dev_info['eid']):
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    data = dev_info
+    return errcode, data
 
 @route('/device/searchByImei')
 def searchDeviceByImei():
@@ -304,14 +324,6 @@ def getLocationInfo():
     data['resEndTime'] = last_info['report_time']
     data['infos'] = gpsinfos
     return ErrCode.ErrOK, data
-
-'''
-http://litin.gmiot.net/1/tool/efence?method=getFenceInfo&user_id=179996&map_type=BAIDU
-http://litin.gmiot.net//1/tool/efence?method=saveFenceInfo&shape_type=1&school_id=1044034&user_id=179996&shape_param=22.543325,113.967297,400&validate_flag=1&map_type=BAIDU
-http://litin.gmiot.net//1/tool/efence?method=saveFenceInfo&shape_type=2&school_id=1044034&user_id=180012&
-shape_param=113.966261,22.543752;113.96547,22.541532;113.971184,22.54452;113.969531,22.54739;113.965003,22.547724;
-113.965057,22.547674;113.965057,22.547674;113.965057,22.547691&validate_flag=1&map_type=BAIDU
-'''
 
 @route('/device/saveFenceInfo')
 def saveFenceInfo():

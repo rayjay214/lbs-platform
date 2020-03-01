@@ -17,6 +17,7 @@ from kafka_op import KafkaOp
 import xlrd
 import datetime
 from trans_coord import wgs84_to_bd09
+from trans_coord import wgs84_to_gcj02
 
 ctree_op = CtreeOp(g_cfg['ctree'])
 redis_op = RedisOp(g_cfg['redis'])
@@ -252,6 +253,12 @@ def getRunInfoByEid():
             lon, lat = wgs84_to_bd09(float(info['longitude'])/1000000, float(info['latitude'])/1000000)
             info['longitude'] = str(lon * 1000000)
             info['latitude'] = str(lat * 1000000)
+        elif map_type == 'amap':
+            lon, lat = wgs84_to_gcj02(float(info['longitude']) / 1000000, float(info['latitude']) / 1000000)
+            info['longitude'] = str(lon * 1000000)
+            info['latitude'] = str(lat * 1000000)
+        else:
+            pass
         info['dev_name'] = dict_devid_devname[info['devid']]
         info['dev_status'] = 'online'
         maxtime = max(int(info['gps_time']), int(info['sys_time']))

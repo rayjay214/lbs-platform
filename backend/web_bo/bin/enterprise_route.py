@@ -257,14 +257,16 @@ def getRunInfoByEid():
     for info in run_infos:
         if map_type == 'baidu':
             lon, lat = wgs84_to_bd09(float(info['longitude'])/1000000, float(info['latitude'])/1000000)
-            info['longitude'] = str(lon * 1000000)
-            info['latitude'] = str(lat * 1000000)
+            info['longitude'] = lon
+            info['latitude'] = lat
         elif map_type == 'amap':
             lon, lat = wgs84_to_gcj02(float(info['longitude']) / 1000000, float(info['latitude']) / 1000000)
-            info['longitude'] = str(lon * 1000000)
-            info['latitude'] = str(lat * 1000000)
+            info['longitude'] = lon
+            info['latitude'] = lat
         else:
-            pass
+            info['longitude'] = float(info['longitude']) / 1000000
+            info['latitude'] = float(info['longitude']) / 1000000
+
         info['dev_name'] = dict_devid_devname[info['devid']]
         info['dev_status'] = 'online'
         maxtime = max(int(info['gps_time']), int(info['sys_time']))

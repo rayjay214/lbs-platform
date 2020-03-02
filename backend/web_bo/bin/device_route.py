@@ -14,6 +14,7 @@ from redis_op import RedisOp
 from businessdb import BusinessDb
 from kafka_op import KafkaOp
 from trans_coord import wgs84_to_bd09
+from trans_coord import wgs84_to_gcj02
 from cassandra_op import CassandraOp
 
 @route('/device/importDevices')
@@ -121,8 +122,15 @@ def getRunInfoByDevid():
     map_type = request.params.get('map_type', None)
     if map_type == 'baidu':
         lon, lat = wgs84_to_bd09(float(run_info['longitude'])/1000000, float(run_info['latitude'])/1000000)
-        run_info['longitude'] = str(lon * 1000000)
-        run_info['latitude'] = str(lat * 1000000)
+        run_info['longitude'] = lon
+        run_info['latitude'] = lat
+    elif map_type == 'amap':
+        lon, lat = wgs84_to_gcj02(float(run_info['longitude']) / 1000000, float(run_info['latitude']) / 1000000)
+        run_info['longitude'] = lon
+        run_info['latitude'] = lat
+    else:
+        run_info['longitude'] = float(run_info['longitude']) / 1000000
+        run_info['latitude'] = float(run_info['longitude']) / 1000000
 
     data = run_info
     #calc dev_status

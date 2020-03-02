@@ -320,6 +320,7 @@ def getLocationInfo():
     dev_id = request.params.get('dev_id', None)
     begin_tm = request.params.get('begin_tm', None)
     end_tm = request.params.get('end_tm', None)
+    map_type = request.params.get('map_type', None)
     if None in (dev_id, begin_tm, end_tm):
         errcode = ErrCode.ErrLackParam
         return errcode, data
@@ -331,6 +332,19 @@ def getLocationInfo():
     if len(gpsinfos) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
+    #adjust coord
+    for info in gpsinfos:
+        if map_type == 'baidu':
+            lng, lat = wgs84_to_bd09(info['lng'], info['lat'])
+            info['lng'] = lng
+            info['lat'] = lat
+        elif map_type == 'amap':
+            lng, lat = wgs84_to_gcj02(info['lng'], info['lat'])
+            info['lng'] = lng
+            info['lat'] = lat
+        else:
+            continue
+
     last_info = gpsinfos[-1]
     data['resEndTime'] = last_info['report_time']
     data['infos'] = gpsinfos

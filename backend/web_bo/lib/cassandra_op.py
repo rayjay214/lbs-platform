@@ -22,8 +22,8 @@ class CassandraOp():
                     'dev_id' : row[0],
                     'report_time' : arrow.get(row[1]).timestamp,
                     'direction' : row[2],
-                    'lat' : row[3],
-                    'lng' : row[4],
+                    'lat' : float(row[3])/1000000,
+                    'lng' : float(row[4])/1000000,
                     'speed' : row[7],
                     'sys_time' : arrow.get(row[8]).timestamp
                 }

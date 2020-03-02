@@ -320,6 +320,9 @@ def getLocationInfo():
     if gpsinfos is None:
         errcode = ErrCode.ErrMysqlError
         return errcode, data
+    if len(gpsinfos) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
     last_info = gpsinfos[-1]
     data['resEndTime'] = last_info['report_time']
     data['infos'] = gpsinfos

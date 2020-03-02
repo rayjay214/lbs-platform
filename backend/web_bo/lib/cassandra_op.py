@@ -23,7 +23,7 @@ class CassandraOp():
                     'report_time' : arrow.get(row[1]).timestamp,
                     'direction' : row[2],
                     'lat' : row[3],
-                    'lon' : row[4],
+                    'lng' : row[4],
                     'speed' : row[7],
                     'sys_time' : arrow.get(row[8]).timestamp
                 }

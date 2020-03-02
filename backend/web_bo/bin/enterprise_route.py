@@ -46,6 +46,10 @@ def getEntInfoByEid():
     data['leaf'] = customer.is_leaf
     data['permission'] = customer.permission
     data['logo_url'] = customer.logo_url
+    #deal with permission
+    data['bms_permission'] = customer.permission[0]
+    data['sensor_permission'] = customer.permission[1]
+    data['gps_permission'] = customer.permission[2]
     return errcode, data
 
 @route('/ent/getEntChildrenByEid')
@@ -145,7 +149,9 @@ def updateEnt():
     phone = request.params.get('phone', None)
     addr = request.params.addr if len(request.params.addr) != 0 else None
     email = request.params.get('email', None)
-    permission = request.params.get('permission', None)
+    bms_permission = request.params.get('bms_permission', '0')
+    sensor_permission = request.params.get('sensor_permission', '0')
+    gps_permission = request.params.get('gps_permission', '1')
     if eid is None:
         g_logger.warn('eid is none')
         errcode = ErrCode.ErrLackParam
@@ -159,8 +165,8 @@ def updateEnt():
     ent['phone'] = phone if phone is not None else ent['phone']
     ent['addr'] = addr if addr is not None else ent['addr']
     ent['email'] = email if email is not None else ent['email']
-    ent['permission'] = permission if permission is not None else ent['permission']
     ent['logo_url'] = ent['logo_url']
+    ent['permission'] = bms_permission + sensor_permission + gps_permission
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_ent(ent)
     return errcode, data

@@ -33,3 +33,63 @@ class CassandraOp():
             g_logger.error(traceback.format_exc())
             g_logger.error(e)
             return None
+
+    def getAlarmByTimeRange(self, dev_ids, begin_ts, end_ts, read_flag=-1):
+        begin_tm = arrow.get(int(begin_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
+        end_tm = arrow.get(int(end_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
+        str_dev_ids = ','.join([str(i) for i in dev_ids])
+        if read_flag == 0:
+            sql = '''select dev_id,receive_time,course,lat,lng,send_time,speed,status,type_id from alarm 
+                    where dev_id in ({}) and receive_time>='{}' and receive_time<'{}' 
+                    and read_flag=0 allow filtering
+                    '''.format(str_dev_ids, begin_tm, end_tm)
+        else:
+            sql = '''select dev_id,receive_time,course,lat,lng,send_time,speed,status,type_id from alarm 
+                    where dev_id in ({}) and receive_time>='{}' and receive_time<'{}' 
+                    '''.format(str_dev_ids, begin_tm, end_tm)
+        try:
+            g_logger.info(sql)
+            alarm_infos = []
+            rows = self.session.execute(sql)
+            for row in rows:
+                alarm = {
+                    'dev_id' : row[0],
+                    'receive_time' : row[1],
+                    'course' : row[2],
+                    'lat' : float(row[3])/1000000,
+                    'lng' : float(row[4])/1000000,
+                    'send_time' : row[5],
+                    'speed' : row[6],
+                    'status' : row[7],
+                    'type_id' : row[8]
+                }
+                alarm_infos.append(alarm)
+            return alarm_infos
+        except Exception as e:
+            g_logger.error(traceback.format_exc())
+            g_logger.error(e)
+            return None
+
+    def getMileStatByTimeRange(self, dev_ids, begin_ts, end_ts):
+        begin_tm = arrow.get(int(begin_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
+        end_tm = arrow.get(int(end_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
+        str_dev_ids = ','.join([str(i) for i in dev_ids])
+        sql = '''select dev_id,stat_date,mileage from milestat 
+                where dev_id in ({}) and stat_data>='{}' and stat_date<'{}' 
+                '''.format(str_dev_ids, begin_tm, end_tm)
+        try:
+            g_logger.info(sql)
+            milestat_infos = []
+            rows = self.session.execute(sql)
+            for row in rows:
+                info = {
+                    'dev_id' : row[0],
+                    'stat_date' : row[1],
+                    'mileage' : row[2]
+                }
+                milestat_infos.append(info)
+            return milestat_infos
+        except Exception as e:
+            g_logger.error(traceback.format_exc())
+            g_logger.error(e)
+            return None

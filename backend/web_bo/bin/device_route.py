@@ -380,3 +380,39 @@ def getFenceInfo():
         return errcode, data
     data['fence'] = fence
     return errcode, data
+
+@route('/device/getAlarmByDevId')
+def getAlarmByDevId():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    map_type = request.params.get('map_type', None)
+    read_flag = request.params.get('read_flag', -1)
+    if None in (dev_id, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    cassandra_op = CassandraOp()
+    alarminfos = cassandra_op.getAlarmByTimeRange(dev_id, begin_tm, end_tm, read_flag)
+    if alarminfos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['alarm_infos'] = alarminfos
+    return errcode, data
+
+@route('/device/getMilestatByDevId')
+def getMilestatByDevId():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    if None in (dev_id, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    cassandra_op = CassandraOp()
+    milestat_infos = cassandra_op.getMilestatByTimeRange(dev_id, begin_tm, end_tm)
+    if milestat_infos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['milestat_infos'] = milestat_infos
+    return errcode, data

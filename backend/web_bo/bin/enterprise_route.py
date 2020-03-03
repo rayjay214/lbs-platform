@@ -18,6 +18,7 @@ import xlrd
 import datetime
 from trans_coord import wgs84_to_bd09
 from trans_coord import wgs84_to_gcj02
+from cassandra_op import CassandraOp
 
 ctree_op = CtreeOp(g_cfg['ctree'])
 redis_op = RedisOp(g_cfg['redis'])
@@ -359,4 +360,51 @@ def getCardInfoByIccid():
     data['card'] = card_info
     return ErrCode.ErrOK, data
 
+@route('/ent/getAlarmByEid')
+def getAlarmByEid():
+    errcode, data = ErrCode.ErrOK, {}
+    eid = request.params.get('eid', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    map_type = request.params.get('map_type', None)
+    if None in (eid, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(eid))
+    if not is_ancestor and int(login_id) != int(eid):
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
+    cassandra_op = CassandraOp()
+    alarminfos = cassandra_op.getAlarmByTimeRange(customer.dev_ids, begin_tm, end_tm, read_flag)
+    if alarminfos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['alarm_infos'] = alarminfos
+    return errcode, data
 
+@route('/ent/getMileStatByEid')
+def getMilestatByEid():
+    errcode, data = ErrCode.ErrOK, {}
+    eid = request.params.get('eid', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    if None in (eid, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(eid))
+    if not is_ancestor and int(login_id) != int(eid):
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
+    cassandra_op = CassandraOp()
+    milestat_infos = cassandra_op.getMileStatByTimeRange(customer.dev_ids, begin_tm, end_tm)
+    if milestat_infos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['milestat_infos'] = milestat_infos
+    return errcode, data

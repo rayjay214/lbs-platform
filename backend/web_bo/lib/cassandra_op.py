@@ -8,11 +8,11 @@ class CassandraOp():
         self.cluster = Cluster()
         self.session = self.cluster.connect('gpsinfo')
 
-    def getGpsInfoByTimeRange(self, dev_id, begin_ts, end_ts):
+    def getGpsInfoByTimeRange(self, dev_id, begin_ts, end_ts, limit):
         begin_tm = arrow.get(int(begin_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         end_tm = arrow.get(int(end_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         sql = '''select * from gps where dev_id={} and report_time>='{}' and report_time<'{}'
-                 order by report_time asc limit 1000'''.format(dev_id, begin_tm, end_tm)
+                 order by report_time asc limit {}'''.format(dev_id, begin_tm, end_tm, limit)
         try:
             g_logger.info(sql)
             gpsinfos = []

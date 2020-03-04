@@ -162,6 +162,17 @@ def updateEnt():
     if errcode != ErrCode.ErrOK:
         data['msg'] = ErrMsg[errcode]
         return errcode, data
+    #check permission, children could not has more permission than parents
+    pid = ent['pid']
+    ctree_op = CustomerInfo(g_cfg['ctree'])
+    parent = ctree_op.getCustomerInfoByEid(int(pid))
+    p_bms_permission = parent.permission[0]
+    p_sensor_permission = parent.permission[1]
+    p_gps_permission = parent.permission[2]
+    if int(p_bms_permission) < int(bms_permission) or int(p_sensor_permission) < int(sensor_permission) or int(p_gps_permission) < int(gps_permission):
+        errcode = ErrCode.ErrPermissionSetInvalid
+        return errcode, data
+
     ent['pid'] = pid if pid is not None else ent['pid']
     ent['phone'] = phone if phone is not None else ent['phone']
     ent['addr'] = addr if addr is not None else ent['addr']

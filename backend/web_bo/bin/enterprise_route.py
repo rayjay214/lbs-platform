@@ -164,14 +164,15 @@ def updateEnt():
         return errcode, data
     #check permission, children could not has more permission than parents
     pid = ent['pid']
-    ctree_op = CustomerInfo(g_cfg['ctree'])
-    parent = ctree_op.getCustomerInfoByEid(int(pid))
-    p_bms_permission = parent.permission[0]
-    p_sensor_permission = parent.permission[1]
-    p_gps_permission = parent.permission[2]
-    if int(p_bms_permission) < int(bms_permission) or int(p_sensor_permission) < int(sensor_permission) or int(p_gps_permission) < int(gps_permission):
-        errcode = ErrCode.ErrPermissionSetInvalid
-        return errcode, data
+    if int(pid) != 0:
+        ctree_op = CtreeOp(g_cfg['ctree'])
+        parent = ctree_op.getCustomerInfoByEid(int(pid))
+        p_bms_permission = parent.permission[0]
+        p_sensor_permission = parent.permission[1]
+        p_gps_permission = parent.permission[2]
+        if int(p_bms_permission) < int(bms_permission) or int(p_sensor_permission) < int(sensor_permission) or int(p_gps_permission) < int(gps_permission):
+            errcode = ErrCode.ErrPermissionSetInvalid
+            return errcode, data
 
     ent['pid'] = pid if pid is not None else ent['pid']
     ent['phone'] = phone if phone is not None else ent['phone']
@@ -378,6 +379,7 @@ def getAlarmByEid():
     begin_tm = request.params.get('begin_tm', None)
     end_tm = request.params.get('end_tm', None)
     map_type = request.params.get('map_type', None)
+    read_flag = request.params.get('read_flag', -1)
     if None in (eid, begin_tm, end_tm):
         errcode = ErrCode.ErrLackParam
         return errcode, data
@@ -396,7 +398,7 @@ def getAlarmByEid():
     data['alarm_infos'] = alarminfos
     return errcode, data
 
-@route('/ent/getMileStatByEid')
+@route('/ent/getMilestatByEid')
 def getMilestatByEid():
     errcode, data = ErrCode.ErrOK, {}
     eid = request.params.get('eid', None)
@@ -413,7 +415,7 @@ def getMilestatByEid():
         return errcode, data
     customer = ctree_op.getCustomerInfoByEid(int(eid))
     cassandra_op = CassandraOp()
-    milestat_infos = cassandra_op.getMileStatByTimeRange(customer.dev_ids, begin_tm, end_tm)
+    milestat_infos = cassandra_op.getMilestatByTimeRange(customer.dev_ids, begin_tm, end_tm)
     if milestat_infos is None:
         errcode = ErrCode.ErrMysqlError
         return errcode, data

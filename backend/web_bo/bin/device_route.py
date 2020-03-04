@@ -393,7 +393,9 @@ def getAlarmByDevId():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     cassandra_op = CassandraOp()
-    alarminfos = cassandra_op.getAlarmByTimeRange(dev_id, begin_tm, end_tm, read_flag)
+    dev_ids = []
+    dev_ids.append(dev_id)
+    alarminfos = cassandra_op.getAlarmByTimeRange(dev_ids, begin_tm, end_tm, read_flag)
     if alarminfos is None:
         errcode = ErrCode.ErrMysqlError
         return errcode, data
@@ -410,7 +412,9 @@ def getMilestatByDevId():
         errcode = ErrCode.ErrLackParam
         return errcode, data
     cassandra_op = CassandraOp()
-    milestat_infos = cassandra_op.getMilestatByTimeRange(dev_id, begin_tm, end_tm)
+    dev_ids = []
+    dev_ids.append(dev_id)
+    milestat_infos = cassandra_op.getMilestatByTimeRange(dev_ids, begin_tm, end_tm)
     if milestat_infos is None:
         errcode = ErrCode.ErrMysqlError
         return errcode, data

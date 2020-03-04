@@ -39,13 +39,13 @@ class CassandraOp():
         end_tm = arrow.get(int(end_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         str_dev_ids = ','.join([str(i) for i in dev_ids])
         if read_flag == 0:
-            sql = '''select dev_id,receive_time,course,lat,lng,send_time,speed,status,type_id from alarm 
-                    where dev_id in ({}) and receive_time>='{}' and receive_time<'{}' 
+            sql = '''select dev_id,receive_time,course,lat,lng,send_time,speed,status,type_id from alarm
+                    where dev_id in ({}) and receive_time>='{}' and receive_time<'{}'
                     and read_flag=0 allow filtering
                     '''.format(str_dev_ids, begin_tm, end_tm)
         else:
-            sql = '''select dev_id,receive_time,course,lat,lng,send_time,speed,status,type_id from alarm 
-                    where dev_id in ({}) and receive_time>='{}' and receive_time<'{}' 
+            sql = '''select dev_id,receive_time,course,lat,lng,send_time,speed,status,type_id from alarm
+                    where dev_id in ({}) and receive_time>='{}' and receive_time<'{}'
                     '''.format(str_dev_ids, begin_tm, end_tm)
         try:
             g_logger.info(sql)
@@ -54,11 +54,11 @@ class CassandraOp():
             for row in rows:
                 alarm = {
                     'dev_id' : row[0],
-                    'receive_time' : row[1],
+                    'receive_time' : arrow.get(row[1]).to('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss'),
                     'course' : row[2],
                     'lat' : float(row[3])/1000000,
                     'lng' : float(row[4])/1000000,
-                    'send_time' : row[5],
+                    'send_time' : arrow.get(row[5]).to('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss'),
                     'speed' : row[6],
                     'status' : row[7],
                     'type_id' : row[8]
@@ -70,12 +70,12 @@ class CassandraOp():
             g_logger.error(e)
             return None
 
-    def getMileStatByTimeRange(self, dev_ids, begin_ts, end_ts):
+    def getMilestatByTimeRange(self, dev_ids, begin_ts, end_ts):
         begin_tm = arrow.get(int(begin_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         end_tm = arrow.get(int(end_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         str_dev_ids = ','.join([str(i) for i in dev_ids])
-        sql = '''select dev_id,stat_date,mileage from milestat 
-                where dev_id in ({}) and stat_data>='{}' and stat_date<'{}' 
+        sql = '''select dev_id,stat_date,mileage from milestat
+                where dev_id in ({}) and stat_date>='{}' and stat_date<'{}'
                 '''.format(str_dev_ids, begin_tm, end_tm)
         try:
             g_logger.info(sql)
@@ -84,7 +84,7 @@ class CassandraOp():
             for row in rows:
                 info = {
                     'dev_id' : row[0],
-                    'stat_date' : row[1],
+                    'stat_date' : arrow.get(row[1]).to('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss'),
                     'mileage' : row[2]
                 }
                 milestat_infos.append(info)

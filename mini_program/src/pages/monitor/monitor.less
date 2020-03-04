@@ -1,0 +1,424 @@
+// output: true;
+map {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /*垂直居中*/
+    justify-content: center;
+    /*水平居中*/
+}
+
+.clearfix:after {
+    content: "";
+    display: block;
+    clear: both;
+}
+.chargeReminder {
+    text-align: center;
+    position: fixed;
+    top: 20rpx;
+    width: 100%;
+    button.btn {
+        width: 60%;
+        font-size: 12px;
+        .reminderTxt {
+            width: 200%;
+            text-align-last: left;
+            color:#2575AC;
+        }
+    }
+}
+
+.btnContainer {
+    position: fixed;
+    top: 20rpx;
+    left: 20rpx;
+    background-color: #fff;
+    border-radius: 10rpx;
+    box-shadow: 0 0 3px 0;
+    width: 88rpx;
+    text-align: center;
+    .alarm {
+        height: 100rpx;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .bindImage {
+            width: 60rpx;
+            height: 60rpx;
+            vertical-align: middle;
+        }
+    }
+    .line {
+        width: 100%;
+        height: 1rpx;
+        background-color: #eee;
+    }
+
+    .deviceList {
+        height: 100rpx;
+        width: 88rpx;
+        box-sizing: border-box;
+        background-color: #fff;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.click {
+            background-color: rgb(246, 245, 249);
+        }
+
+        cover-image {
+            width: 60rpx;
+            height: 60rpx;
+        }
+    }    
+}
+.voltage {
+    position: fixed;
+    top: 240rpx;
+    left: 20rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 88rpx;
+    height: 88rpx;
+    background-color: #fff;
+    font-size: 9px;
+    border-radius: 10rpx;
+    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.30);
+    .voltageImgBox {
+        position: relative;
+        width: 68rpx;
+        height: 37rpx;
+        cover-image {
+            width: 100%;
+            height: 100%;
+            vertical-align: middle;
+        }
+        .voltageStatus {
+            width: 49rpx;
+            height: 26rpx;
+            background-color: rgb(92, 234, 57);
+            position: absolute;
+            top: 6rpx;
+            left: 7rpx;
+            border-radius: 4rpx;
+        }
+    }
+
+    .voltageText {
+        margin-top: 8rpx;
+    }    
+}
+
+.btnContainerRight {
+    position: fixed;
+    right: 20rpx;
+    top: 8rpx;
+    width: 110rpx;
+    height: 220rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .bindDevice {
+        color: #000;
+        text-align: center;
+        border-radius: 10rpx;
+        width: 88rpx;
+        height: 88rpx;
+        box-sizing: border-box;
+        padding: 14rpx 8rpx 8rpx;
+        font-size: 0px;
+        box-shadow: 0 0 6rpx 0 rgba(0, 0, 0, 0.30);
+
+        .bindImage {
+            line-height: 1;
+            width: 36rpx;
+            height: 36rpx;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .bindText {
+            margin-top: 10rpx;
+            font-size: 9px;
+        }
+    }
+    .batteryManage {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 88rpx;
+        height: 88rpx;
+        background-color: #fff;
+        font-size: 9px;
+        margin-top: 20rpx;
+        border-radius: 10rpx;
+        box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.30);
+        .batteryImgBox {
+            position: relative;
+            width: 68rpx;
+            height: 37rpx;
+            cover-image {
+                width: 100%;
+                height: 100%;
+                vertical-align: middle;
+            }
+            .batteryStatus {
+                width: 49rpx;
+                height: 26rpx;
+                background-color: rgb(92, 234, 57);
+                position: absolute;
+                top: 6rpx;
+                left: 7rpx;
+                border-radius: 4rpx;
+            }
+        }
+
+        .bmsText {
+            margin-top: 8rpx;
+        }
+    }
+}
+
+
+.shareLocation {
+    position: fixed;
+    bottom: 190px;
+    height: 30px;
+    width: 80px;
+    text-align: center;
+    right: 20rpx;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 30px;
+    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.30);
+    border-radius: 5px;
+
+    button {
+        color: #2575AC;
+        line-height: 30px;
+        font-size: 12px;
+    }
+}
+
+.lastLocation {
+    margin-top: 6px;
+    padding: 0 20px;
+    font-size: 13px;
+
+    cover-view {
+        display: inline-block;
+        font-size: 13px;
+
+        &.line {
+            margin-left: 10rpx;
+            margin-right: 10rpx;
+        }
+    }
+}
+
+.switchBtn {
+    position: fixed;
+    color: #fff;
+    right: 20rpx;
+    top: 120rpx;
+    border-radius: 5px;
+
+    button {
+        padding: 0 10rpx;
+    }
+}
+
+.markerInfo {
+    position: fixed;
+    bottom: 0;
+    background-color: #fff;
+    width: 100%;
+    height: 182px;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
+
+    .name {
+        font-size: 18px;
+        line-height: 25px;
+        font-weight: bolder;
+        padding: 15px 20px 0px 20px;
+        font-family: PingFangSC-Medium;
+    }
+
+    .status {
+        margin-top: 6px;
+        padding: 0 20px;
+
+        .runStatus {
+            font-size: 13px;
+            display: inline-block;
+            width: 50%;
+
+            &.stop {
+                color: #008CFF;
+            }
+
+            &.offline {
+                color: #6B6B6B;
+            }
+
+            &.overdue {
+                color: #D43FB5;
+            }
+
+            &.unused {
+                color: #6B6B6B;
+            }
+
+            &.normal {
+                color: #00BB32;
+            }
+        }
+
+        .battery {
+            font-size: 13px;
+            display: inline-block;
+            width: 50%;
+        }
+    }
+
+    .address {
+        margin-top: 6px;
+        font-size: 13px;
+        line-height: 18px;
+        padding: 0 20px;
+        overflow: hidden;
+        white-space: normal;
+        max-height: 36px;
+        display: -webkit-box;
+        text-overflow: ellipsis;
+    }
+
+    .fullLine {
+        position: absolute;
+        bottom: 55px;
+        height: 1rpx;
+        background-color: #DFDFDF;
+        width: 750rpx;
+    }
+    .navigation {
+        color: #2575AC;
+        margin-left: 10rpx;
+        font-size: 13px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .operation {
+        padding: 12px 20px;
+        height: 55px;
+        box-sizing: border-box;
+        overflow: visible;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+
+        .left {
+            float: left;
+            display: flex;
+            font-size: 15px;
+
+            .line,
+            .playback,
+            .command {
+                margin-left: 15px;
+                line-height: 31px;
+                font-size: 15px;
+            }
+
+            .line {
+                color: #DFDFDF;
+            }
+
+            .detail,
+            .playback,
+            .command {
+                color: #2575AC;
+                line-height: 31px;
+                font-size: 15px;
+            }
+        }
+
+        .right {
+            float: right;
+            display: flex;
+
+            .text {
+                margin-right: 10px;
+                font-size: 15px;
+                line-height: 30px;
+            }
+
+            .rail {
+                width: 50px;
+                height: 30px;
+                background-color: rgb(224, 224, 224);
+                border-radius: 15px;
+                position: relative;
+
+                .circle {
+                    width: 26px;
+                    height: 26px;
+                    background-color: #ffffff;
+                    border-radius: 13px;
+                    top: 2px;
+                    position: absolute;
+                    right: 22px;
+                }
+
+                &.on {
+                    background-color: rgb(68, 219, 94);
+
+                    .circle {
+                        right: 2px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.noDevice {
+    position: fixed;
+    bottom: 27px;
+    width: 650rpx;
+    height: 44px;
+    background-color: #22262D;
+    left: 50%;
+    transform: translateX(-50%);
+    line-height: 1;
+    text-align: center;
+
+    .plus {
+        position: absolute;
+        height: 14px;
+        width: 26rpx;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 252rpx;
+    }
+
+    .text {
+        display: inline-block;
+        font-size: 15px;
+        color: #fff;
+        vertical-align: middle;
+        line-height: 44px;
+        margin-left: 60rpx;
+    }
+}

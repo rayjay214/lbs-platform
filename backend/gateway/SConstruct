@@ -1,0 +1,54 @@
+
+env = Environment()
+env.Append(CPPPATH = [
+    './',
+    './common/include/',
+    './common/protobuf/',
+    '/usr/local/include',
+    '/usr/include',
+    '/usr/include/IceUtil',
+    '/usr/local/libcurl/include/',
+    ])
+
+env.Append(CPPDEFINES = ['_LINUX_OS_', 'RAPIDJSON_HAS_STDSTRING', '__STDC_FORMAT_MACROS'])
+env.Append(CPPFLAGS = ['-g', '-Wall', '-std=c++0x'])
+#env.Append(CPPFLAGS = Split('-g -fPIC -Wall -pipe -fno-ident -MMD -D_GNU_SOURCE -D_REENTRANT -D__STDC_FORMAT_MACROS -std=c++0x -Wno-deprecated'))
+
+env.Append(LIBS = ['common', 'Ice', 'IceUtil', 'gmlogapi', '_redis_cpp_client', 'cassandra', 'rdkafka', 'boost_system', 'curl', 'protobuf', 'pthread', 'rt', 'log4cxx', 'tbb', 'ssl', 'crypto'])
+
+env.Append(LIBPATH = [
+ './common/lib',
+ '/usr/lib64',
+ '/usr/lib/nptl',
+ '/usr/local/lib/tbb',
+ '/usr/lib',
+ '/usr/local/lib',
+ '/usr/local/libcurl/lib'
+ ])
+
+env.Append(RPATH = ['/usr/lib', '/usr/local/lib', '/usr/lib64', '/usr/lib/nptl', '/usr/local/lib/tbb'])
+
+
+#src_files = [
+#    'common.cpp',
+#    'ggwapp.cpp',
+#    'global.cpp',
+#    'GWReaderThread.cpp',
+#    'main.cpp',
+#    't808Parser.cpp'
+#]
+
+src_files = Glob('*.cpp')
+src_files.extend([
+  './common/src/GnsIceHandle.cpp',
+  './common/src/anet.c',
+  './common/src/RedisConnectPool.cpp',
+  './common/src/RedisHandle.cpp',
+  './common/src/RedisOp.cpp',
+  './common/protobuf/dev.pb.cc',
+  './common/protobuf/lbs.pb.cc',
+])
+ggwTestServer = env.Program('ggwTestServer', src_files)
+
+# Installation
+env.Install('build/bin', ggwTestServer)

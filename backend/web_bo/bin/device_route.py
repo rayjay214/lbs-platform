@@ -169,6 +169,12 @@ def getBmsInfoByDevid():
     if bms_info is None or len(bms_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
+    dev_info = redis_op.getDeviceInfoById(dev_id)
+    bms_info['first_online_time'] = dev_info['CREATE_TIME']
+    bms_info['imei'] = dev_info['imei']
+    bms_info['production_date'] = arrow.get(dev_info['production_date']).format('YYYY-MM-DD')
+    bms_info['product_type'] = dev_info['product_type']
+    bms_info['manufacturer'] = dev_info['manufacturer']
     data = bms_info
     return errcode, data
 

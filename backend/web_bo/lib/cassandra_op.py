@@ -12,7 +12,8 @@ class CassandraOp():
         begin_tm = arrow.get(int(begin_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         end_tm = arrow.get(int(end_ts)).format('YYYY-MM-DD HH:mm:ss ZZ')
         sql = '''select * from gps where dev_id={} and report_time>='{}' and report_time<'{}'
-                 order by report_time asc limit {}'''.format(dev_id, begin_tm, end_tm, limit)
+                 and speed > 0 order by report_time asc limit {} allow filtering
+              '''.format(dev_id, begin_tm, end_tm, limit)
         try:
             g_logger.info(sql)
             gpsinfos = []

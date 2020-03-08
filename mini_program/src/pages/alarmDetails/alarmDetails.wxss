@@ -1,0 +1,43 @@
+Page {
+  height: 100%;
+}
+.detailBox {
+  height: 100%;
+  background-color: #d3d3d3;
+}
+.detailBox .detail {
+  height: 240rpx;
+  background-color: #fff;
+  border-radius: 10rpx;
+  padding-left: 30rpx;
+}
+.detailBox .detail .equipment {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: left;
+  font-size: 16px;
+  border-bottom: 1rpx solid #d3d3d3;
+}
+.detailBox .detail .address {
+  font-size: 15px;
+  border-bottom: 1rpx solid #d3d3d3;
+  width: 100%;
+  height: 80rpx;
+  text-align: left;
+}
+.detailBox .detail .details {
+  font-size: 14px;
+  color: blue;
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: left;
+}
+.detailBox .detailsDate {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 12px;
+}

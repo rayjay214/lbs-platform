@@ -1,0 +1,30 @@
+<!--pages/login/login.wxml-->
+<view class="container"> 
+  <view class="login-icon">  
+    <image class="login-img" src="http://webbo.yunjiwulian.com/images/logo/10057_yunji.png"></image>  
+  </view>  
+  <view class="login-from">  
+  <form bindsubmit="submit" class='form'>
+    <view class="account">
+      <view class="weui-cell weui-cell_input">
+      <image class="accountImage" src="../images/name.png"></image>
+          <view class="weui-cell__bd">
+              <input class="weui-input mytest" name="account" bindinput="accountInput" value='{{accout}}' placeholder="请输入账号" />
+          </view>
+      </view>
+    </view>
+    <view class="pwd">
+      <view class="weui-cell weui-cell_input">
+      <image class="accountImage" src="../images/key.png"></image>
+          <view class="weui-cell__bd">
+              <input class="weui-input mytest" type="password" name="pwd" bindinput="pwdInput" placeholder="请输入密码" value='{{pwd}}'/>
+          </view>
+      </view>
+    </view>
+    <view class="loginBtnView">  
+      <button class="loginBtn" size="{{primarySize}}"  form-type='submit' disabled='{{!could_submit}}'>登录</button>  
+    </view>  
+    </form>
+  
+  </view>  
+</view>

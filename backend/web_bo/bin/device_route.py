@@ -14,6 +14,7 @@ from redis_op import RedisOp
 from businessdb import BusinessDb
 from kafka_op import KafkaOp
 from trans_coord import wgs84_to_bd09
+from trans_coord import wgs84_to_gcj02
 from cassandra_op import CassandraOp
 
 @route('/device/importDevices')
@@ -121,8 +122,15 @@ def getRunInfoByDevid():
     map_type = request.params.get('map_type', None)
     if map_type == 'baidu':
         lon, lat = wgs84_to_bd09(float(run_info['longitude'])/1000000, float(run_info['latitude'])/1000000)
-        run_info['longitude'] = str(lon * 1000000)
-        run_info['latitude'] = str(lat * 1000000)
+        run_info['longitude'] = lon
+        run_info['latitude'] = lat
+    elif map_type == 'amap':
+        lon, lat = wgs84_to_gcj02(float(run_info['longitude']) / 1000000, float(run_info['latitude']) / 1000000)
+        run_info['longitude'] = lon
+        run_info['latitude'] = lat
+    else:
+        run_info['longitude'] = float(run_info['longitude']) / 1000000
+        run_info['latitude'] = float(run_info['longitude']) / 1000000
 
     data = run_info
     #calc dev_status
@@ -161,6 +169,12 @@ def getBmsInfoByDevid():
     if bms_info is None or len(bms_info) == 0:
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
+    dev_info = redis_op.getDeviceInfoById(dev_id)
+    bms_info['first_online_time'] = dev_info['CREATE_TIME']
+    bms_info['imei'] = dev_info['imei']
+    bms_info['production_date'] = arrow.get(dev_info['production_date']).format('YYYY-MM-DD')
+    bms_info['product_type'] = dev_info['product_type']
+    bms_info['manufacturer'] = dev_info['manufacturer']
     data = bms_info
     return errcode, data
 
@@ -314,16 +328,33 @@ def getLocationInfo():
     dev_id = request.params.get('dev_id', None)
     begin_tm = request.params.get('begin_tm', None)
     end_tm = request.params.get('end_tm', None)
+    map_type = request.params.get('map_type', None)
+    limit = request.params.get('limit', 1000)
     if None in (dev_id, begin_tm, end_tm):
         errcode = ErrCode.ErrLackParam
         return errcode, data
     cassandra_op = CassandraOp()
-    gpsinfos = cassandra_op.getGpsInfoByTimeRange(dev_id, begin_tm, end_tm)
+    gpsinfos = cassandra_op.getGpsInfoByTimeRange(dev_id, begin_tm, end_tm, limit)
     if gpsinfos is None:
         errcode = ErrCode.ErrMysqlError
         return errcode, data
-    last_info = gpsinfos[-1]
-    data['resEndTime'] = last_info['report_time']
+    #adjust coord
+    for info in gpsinfos:
+        if map_type == 'baidu':
+            lng, lat = wgs84_to_bd09(info['lng'], info['lat'])
+            info['lng'] = lng
+            info['lat'] = lat
+        elif map_type == 'amap':
+            lng, lat = wgs84_to_gcj02(info['lng'], info['lat'])
+            info['lng'] = lng
+            info['lat'] = lat
+        else:
+            continue
+    if len(gpsinfos) < int(limit):
+        data['resEndTime'] = end_tm
+    else:
+        data['resEndTime'] = gpsinfos[-1]['report_time'] + 1
+
     data['infos'] = gpsinfos
     return ErrCode.ErrOK, data
 
@@ -356,4 +387,44 @@ def getFenceInfo():
         errcode = ErrCode.ErrDataNotFound
         return errcode, data
     data['fence'] = fence
+    return errcode, data
+
+@route('/device/getAlarmByDevId')
+def getAlarmByDevId():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    map_type = request.params.get('map_type', None)
+    read_flag = request.params.get('read_flag', -1)
+    if None in (dev_id, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    cassandra_op = CassandraOp()
+    dev_ids = []
+    dev_ids.append(dev_id)
+    alarminfos = cassandra_op.getAlarmByTimeRange(dev_ids, begin_tm, end_tm, read_flag)
+    if alarminfos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['alarm_infos'] = alarminfos
+    return errcode, data
+
+@route('/device/getMilestatByDevId')
+def getMilestatByDevId():
+    errcode, data = ErrCode.ErrOK, {}
+    dev_id = request.params.get('dev_id', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    if None in (dev_id, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    cassandra_op = CassandraOp()
+    dev_ids = []
+    dev_ids.append(dev_id)
+    milestat_infos = cassandra_op.getMilestatByTimeRange(dev_ids, begin_tm, end_tm)
+    if milestat_infos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['milestat_infos'] = milestat_infos
     return errcode, data

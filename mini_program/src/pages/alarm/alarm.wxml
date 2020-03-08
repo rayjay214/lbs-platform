@@ -1,0 +1,16 @@
+<scroll-view scroll-y class="alarmBox">
+  <view class="item" wx:for="{{alarmList}}" bindtap="readDetail" data-alarm_type="{{item.alarm_type}}" data-alarm_type_id="{{item.alarm_type_id}}" data-user_name="{{item.user_name}}">
+    <view class="img">
+      <image src="./../images/alarm_type_{{alarmTypes[item.alarm_type_id] ? alarmTypes[item.alarm_type_id] : 'other'}}.png" alt="#"></image>
+    </view>
+    <view class="center">
+      <view class="top">{{item.alarm_type}}</view>
+      <view class="bottom">{{item.user_name}}</view>
+    </view>
+    <view class="right">
+      <text class="top">{{item.send_time}}</text>
+      <text class="bottom">{{item.alarm_num}}</text>
+    </view>
+  </view>
+  
+</scroll-view>

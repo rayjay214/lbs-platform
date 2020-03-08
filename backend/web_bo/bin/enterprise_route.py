@@ -18,6 +18,7 @@ import xlrd
 import datetime
 from trans_coord import wgs84_to_bd09
 from trans_coord import wgs84_to_gcj02
+from cassandra_op import CassandraOp
 
 ctree_op = CtreeOp(g_cfg['ctree'])
 redis_op = RedisOp(g_cfg['redis'])
@@ -46,6 +47,10 @@ def getEntInfoByEid():
     data['leaf'] = customer.is_leaf
     data['permission'] = customer.permission
     data['logo_url'] = customer.logo_url
+    #deal with permission
+    data['bms_permission'] = customer.permission[0]
+    data['sensor_permission'] = customer.permission[1]
+    data['gps_permission'] = customer.permission[2]
     return errcode, data
 
 @route('/ent/getEntChildrenByEid')
@@ -145,7 +150,9 @@ def updateEnt():
     phone = request.params.get('phone', None)
     addr = request.params.addr if len(request.params.addr) != 0 else None
     email = request.params.get('email', None)
-    permission = request.params.get('permission', None)
+    bms_permission = request.params.get('bms_permission', '0')
+    sensor_permission = request.params.get('sensor_permission', '0')
+    gps_permission = request.params.get('gps_permission', '1')
     if eid is None:
         g_logger.warn('eid is none')
         errcode = ErrCode.ErrLackParam
@@ -155,12 +162,24 @@ def updateEnt():
     if errcode != ErrCode.ErrOK:
         data['msg'] = ErrMsg[errcode]
         return errcode, data
+    #check permission, children could not has more permission than parents
+    pid = ent['pid']
+    if int(pid) != 0:
+        ctree_op = CtreeOp(g_cfg['ctree'])
+        parent = ctree_op.getCustomerInfoByEid(int(pid))
+        p_bms_permission = parent.permission[0]
+        p_sensor_permission = parent.permission[1]
+        p_gps_permission = parent.permission[2]
+        if int(p_bms_permission) < int(bms_permission) or int(p_sensor_permission) < int(sensor_permission) or int(p_gps_permission) < int(gps_permission):
+            errcode = ErrCode.ErrPermissionSetInvalid
+            return errcode, data
+
     ent['pid'] = pid if pid is not None else ent['pid']
     ent['phone'] = phone if phone is not None else ent['phone']
     ent['addr'] = addr if addr is not None else ent['addr']
     ent['email'] = email if email is not None else ent['email']
-    ent['permission'] = permission if permission is not None else ent['permission']
     ent['logo_url'] = ent['logo_url']
+    ent['permission'] = bms_permission + sensor_permission + gps_permission
     db_w = BusinessDb(g_cfg['db_business_w'])
     errcode = db_w.update_ent(ent)
     return errcode, data
@@ -251,14 +270,16 @@ def getRunInfoByEid():
     for info in run_infos:
         if map_type == 'baidu':
             lon, lat = wgs84_to_bd09(float(info['longitude'])/1000000, float(info['latitude'])/1000000)
-            info['longitude'] = str(lon * 1000000)
-            info['latitude'] = str(lat * 1000000)
+            info['longitude'] = lon
+            info['latitude'] = lat
         elif map_type == 'amap':
             lon, lat = wgs84_to_gcj02(float(info['longitude']) / 1000000, float(info['latitude']) / 1000000)
-            info['longitude'] = str(lon * 1000000)
-            info['latitude'] = str(lat * 1000000)
+            info['longitude'] = lon
+            info['latitude'] = lat
         else:
-            pass
+            info['longitude'] = float(info['longitude']) / 1000000
+            info['latitude'] = float(info['longitude']) / 1000000
+
         info['dev_name'] = dict_devid_devname[info['devid']]
         info['dev_status'] = 'online'
         maxtime = max(int(info['gps_time']), int(info['sys_time']))
@@ -351,4 +372,52 @@ def getCardInfoByIccid():
     data['card'] = card_info
     return ErrCode.ErrOK, data
 
+@route('/ent/getAlarmByEid')
+def getAlarmByEid():
+    errcode, data = ErrCode.ErrOK, {}
+    eid = request.params.get('eid', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    map_type = request.params.get('map_type', None)
+    read_flag = request.params.get('read_flag', -1)
+    if None in (eid, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(eid))
+    if not is_ancestor and int(login_id) != int(eid):
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
+    cassandra_op = CassandraOp()
+    alarminfos = cassandra_op.getAlarmByTimeRange(customer.dev_ids, begin_tm, end_tm, read_flag)
+    if alarminfos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['alarm_infos'] = alarminfos
+    return errcode, data
 
+@route('/ent/getMilestatByEid')
+def getMilestatByEid():
+    errcode, data = ErrCode.ErrOK, {}
+    eid = request.params.get('eid', None)
+    begin_tm = request.params.get('begin_tm', None)
+    end_tm = request.params.get('end_tm', None)
+    if None in (eid, begin_tm, end_tm):
+        errcode = ErrCode.ErrLackParam
+        return errcode, data
+    login_id = request.params.get('LOGIN_ID')
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    is_ancestor = ctree_op.isAncestor(int(login_id), int(eid))
+    if not is_ancestor and int(login_id) != int(eid):
+        errcode = ErrCode.ErrNoPermission
+        return errcode, data
+    customer = ctree_op.getCustomerInfoByEid(int(eid))
+    cassandra_op = CassandraOp()
+    milestat_infos = cassandra_op.getMilestatByTimeRange(customer.dev_ids, begin_tm, end_tm)
+    if milestat_infos is None:
+        errcode = ErrCode.ErrMysqlError
+        return errcode, data
+    data['milestat_infos'] = milestat_infos
+    return errcode, data

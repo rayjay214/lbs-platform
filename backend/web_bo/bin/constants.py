@@ -13,6 +13,7 @@ class ErrCode(IntEnum):
     ErrEntHasChildren = 9
     ErrTypeNotSupported = 10
     ErrParamInvalid = 11
+    ErrPermissionSetInvalid = 12
 
 ErrMsg = {
     0  : 'OK',
@@ -26,7 +27,8 @@ ErrMsg = {
     8  : 'account still has devices',
     9  : 'account still has children accounts',
     10 : 'product type not supported',
-    11 : 'param invalid'
+    11 : 'param invalid',
+    12 : 'child could not have greater permission than parent'
 }
 
 RedisKeyPrefix = {

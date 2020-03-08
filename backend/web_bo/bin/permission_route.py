@@ -103,7 +103,8 @@ def get_v_length(value):
 @route('/login/loginByEnt', method=['GET', 'POST'])
 def enterprise_login():
     errcode, data = ErrCode.ErrOK, {}
-    login_name = request.params.get('login_name', None)
+    #login_name = request.params.get('login_name', None)
+    login_name = request.params.login_name if len(request.params.login_name) != 0 else None
     time = request.params.get('time', None)
     signature = request.params.get('signature', None) #md5(md5(passwd) + time)
     if login_name is None or time is None or signature is None:

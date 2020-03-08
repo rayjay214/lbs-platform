@@ -182,9 +182,9 @@ class BusinessDb(BaseDb):
 
     def update_device(self, device: dict):
         self.check()
-        sql = '''update t_device set dev_name='{}', product_type='{}'
+        sql = '''update t_device set dev_name='{}', product_type='{}', remark='{}'
                  where dev_id={};
-              '''.format(device['dev_name'], device['product_type'], device['dev_id'])
+              '''.format(device['dev_name'], device['product_type'], device['remark'], device['dev_id'])
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(sql)

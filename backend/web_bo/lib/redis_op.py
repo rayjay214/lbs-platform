@@ -21,6 +21,15 @@ class RedisOp():
         dev_id = self.redis.get('imei:{}'.format(imei))
         return self.getDeviceInfoById(dev_id)
 
+    def getDeviceInfoByimeis(self, imeis):
+        for imei in imeis:
+            self.pipe.get('imei:{}'.format(imei))
+        dev_ids = self.pipe.execute()
+        for dev_id in dev_ids:
+            self.pipe.hgetall('device:{}'.format(dev_id))
+        dev_infos = self.pipe.execute()
+        return dev_infos
+
     def getDeviceRunInfoById(self, dev_id):
         run_info = self.redis.hgetall('devruninfo:{}'.format(dev_id))
         return run_info
@@ -46,3 +55,8 @@ class RedisOp():
     def getFenceInfoByDevId(self, dev_id):
         fence_info = self.redis.hgetall('fence:{}'.format(dev_id))
         return fence_info
+
+    def scanImeisByPattern(self, pattern):
+        rst = self.redis.scan(match='imeis:*{}*'.format(pattern), count=100000)
+        imeis = [item.split(':')[1] for item in rst[1]]
+        return imeis

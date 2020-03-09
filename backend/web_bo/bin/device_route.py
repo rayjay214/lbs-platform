@@ -96,6 +96,29 @@ def searchDeviceByImei():
     channel.close()
     return errcode, data
 
+@route('/device/searchImeiByPattern')
+def searchImeiByPattern():
+    errcode, data = ErrCode.ErrOK, {}
+    pattern = request.params.get('pattern', None)
+    if pattern is None:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    redis_op = RedisOp(g_cfg['redis'])
+    imeis = redis_op.scanImeisByPattern(pattern)
+    if imeis is None or len(imeis) == 0:
+        errcode = ErrCode.ErrDataNotFound
+        return errcode, data
+    dev_infos = redis_op.getDeviceInfoByimeis(imeis)
+    authorized_imeis = []
+    login_id = request.params.get('LOGIN_ID')
+    ctree_op = CtreeOp(g_cfg['ctree'])
+    for dev_info in dev_infos:
+        is_ancestor = ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
+        if is_ancestor or int(login_id) == int(dev_info['eid']):
+            authorized_imeis.push_back(dev_info['imei'])
+    data = authorized_imeis
+    return errcode, data
+
 @route('/device/getRunInfoByDevid')
 def getRunInfoByDevid():
     errcode, data = ErrCode.ErrOK, {}

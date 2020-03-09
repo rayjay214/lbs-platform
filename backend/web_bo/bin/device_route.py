@@ -115,7 +115,7 @@ def searchImeiByPattern():
     for dev_info in dev_infos:
         is_ancestor = ctree_op.isAncestor(int(login_id), int(dev_info['eid']))
         if is_ancestor or int(login_id) == int(dev_info['eid']):
-            authorized_imeis.push_back(dev_info['imei'])
+            authorized_imeis.append(dev_info['imei'])
     data = authorized_imeis
     return errcode, data
 

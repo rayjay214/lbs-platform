@@ -1,4 +1,5 @@
 import redis
+from globals import g_logger, g_cfg
 
 class RedisOp():
     def __init__(self, cfg):
@@ -57,6 +58,6 @@ class RedisOp():
         return fence_info
 
     def scanImeisByPattern(self, pattern):
-        rst = self.redis.scan(match='imeis:*{}*'.format(pattern), count=100000)
+        rst = self.redis.scan(match='imei:*{}*'.format(pattern), count=100000)
         imeis = [item.split(':')[1] for item in rst[1]]
         return imeis
